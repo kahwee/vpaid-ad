@@ -1,0 +1,40 @@
+{
+  "name": "vpaid-ad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "browserify": "browserify src/index.js -o dist/vpaid-ad.js",
+    "watchify": "watchify src/index.js -o dist/vpaid-ad.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kahwee/vpaid-ad.git"
+  },
+  "author": "KahWee Teng <t@kw.sg>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kahwee/vpaid-ad/issues"
+  },
+  "homepage": "https://github.com/kahwee/vpaid-ad#readme",
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "babel-core": "^5.8.25",
+    "babelify": "^6.3.0",
+    "browserify": "^11.2.0",
+    "gulp": "^3.9.0"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "optional": [
+            "es7.asyncFunctions"
+          ]
+        }
+      ]
+    ]
+  }
+}
