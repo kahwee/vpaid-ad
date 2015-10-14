@@ -56,7 +56,7 @@ function $throwError (msg) {
 function $trigger (event, msg) {
   console.log(`[${event}]`, msg)
   var subscribers = this._subscribers[event] || []
-  subscribers.forEach(function (handlers) {
+  subscribers.forEach(handlers => {
     handlers.callback.apply(handlers.context, msg)
   })
 }
@@ -206,7 +206,6 @@ export default class Linear {
    * @param {object} environmentVars
    */
   initAd (width, height, viewMode, desiredBitrate, creativeData, environmentVars) {
-    console.log(arguments)
     this._attributes.size.width = width
     this._attributes.size.height = height
     this._attributes.viewMode = viewMode
@@ -339,9 +338,7 @@ export default class Linear {
     var eventSubscribers = this._subscribers[event]
     if (!Array.isArray(eventSubscribers)) return
 
-    this._subscribers[event] = eventSubscribers.filter(function (subscriber) {
-      return handler !== subscriber
-    })
+    this._subscribers[event] = eventSubscribers.filter(subscriber => handler !== subscriber)
   }
 
   /**
@@ -438,7 +435,9 @@ export default class Linear {
    * @param {number} volume  between 0 and 1
    */
   setAdVolume (volume) {
-    if (volume < 0 || volume > 1) return $throwError('volume is not valid')
+    if (volume < 0 || volume > 1) {
+      return $throwError('volume is not valid')
+    }
 
     this._videoSlot.volume = volume
     this._attributes.volume = volume
