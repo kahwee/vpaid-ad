@@ -1,3 +1,4 @@
+import $onClickThru from './handler/click-thru'
 
 function $enableSkippable () {
   this._attributes.skippableState = true
@@ -25,20 +26,6 @@ function $onVideoEnded () {
 
   $removeAll.call(this)
   $trigger.call(this, 'AdStopped')
-}
-
-function $onClickThru () {
-  var clickThru = this._parameters.clickThru || {
-      url: 'http://www.dailymail.com',
-      trackID: 123,
-      playerHandles: false
-    }
-
-  $trigger.call(this, 'AdClickThru', [clickThru.url, clickThru.trackID, clickThru.playerHandles])
-
-  if (!clickThru.playerHandles) {
-    window.open(clickThru.url, '_blank')
-  }
 }
 
 function $removeAll () {
