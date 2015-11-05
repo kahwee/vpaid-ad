@@ -19,10 +19,11 @@
   },
   "homepage": "https://github.com/kahwee/vpaid-ad#readme",
   "devDependencies": {
-    "babel": "^5.8.23",
-    "babel-core": "^5.8.25",
-    "babelify": "^6.3.0",
-    "browserify": "^11.2.0",
+    "babel": "^6.0.15",
+    "babel-core": "^6.0.20",
+    "babel-preset-es2015": "^6.0.15",
+    "babelify": "^7.2.0",
+    "browserify": "^12.0.1",
     "gulp": "^3.9.0"
   },
   "browserify": {
@@ -30,8 +31,8 @@
       [
         "babelify",
         {
-          "optional": [
-            "es7.asyncFunctions"
+          "presets": [
+            "es2015"
           ]
         }
       ]
