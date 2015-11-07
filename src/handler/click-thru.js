@@ -7,7 +7,8 @@ export default function () {
 
   $trigger.call(this, 'AdClickThru', [clickThru.url, clickThru.trackID, clickThru.playerHandles])
 
-  if (!clickThru.playerHandles) {
-    window.open(clickThru.url, '_blank')
-  }
+  // Babel 6 can'mt seem to compile this
+  // if (!clickThru.playerHandles) {
+  //   window.open(clickThru.url, '_blank')
+  // }
 }

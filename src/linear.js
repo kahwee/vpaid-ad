@@ -1,51 +1,16 @@
 import $onClickThru from './handler/click-thru'
+import loadCss from './util/load-css'
+import $trigger from './trigger'
+import {$toggleExpand, $togglePlay, $toggleUI, $removeAll} from './toggles'
+import handleVastEnded from './handler/vast-ended'
+import handleVastTimeupdate from './handler/vast-timeupdate'
 
 function $enableSkippable () {
   this._attributes.skippableState = true
 }
 
-function $onVideoUpdated () {
-  if (this._destroyed) return
-
-  var videoSlot = this._videoSlot
-  var percentPlayed = _mapNumber(0, videoSlot.duration, 0, 100, videoSlot.currentTime)
-  var last = this._lastQuartilePosition
-
-  if (percentPlayed < last.position) return
-
-  if (last.hook) last.hook()
-
-  $trigger.call(this, last.event)
-
-  var quartile = this._quartileEvents
-  this._lastQuartilePosition = quartile[ quartile.indexOf(last) + 1 ]
-}
-
-function $onVideoEnded () {
-  if (this._destroyed) return
-
-  $removeAll.call(this)
-  $trigger.call(this, 'AdStopped')
-}
-
-function $removeAll () {
-  this._destroyed = true
-  this._videoSlot.src = ''
-  this._style.parentElement.removeChild(this._style)
-  this._slot.innerHTML = ''
-  this._ui = null
-}
-
 function $throwError (msg) {
   $trigger.call(this, 'AdError', msg)
-}
-
-function $trigger (event, msg) {
-  console.log(`[${event}]`, msg)
-  var subscribers = this._subscribers[event] || []
-  subscribers.forEach(handlers => {
-    handlers.callback.apply(handlers.context, msg)
-  })
 }
 
 function $setVideoAd () {
@@ -58,34 +23,6 @@ function $setVideoAd () {
 
   if (!_setSupportedVideo(videoSlot, this._parameters.videos || [])) {
     return $throwError.call(this, 'no supported video found')
-  }
-}
-
-function $toggleExpand (toExpand) {
-  $toggleUI.call(this, toExpand)
-  $togglePlay.call(this, toExpand)
-
-  this._attributes.expandAd = toExpand
-  this._attributes.remainingTime = toExpand ? -2 : -1
-
-  $trigger.call(this, 'AdExpandedChange')
-  $trigger.call(this, 'AdDurationChange')
-}
-
-function $togglePlay (toPlay) {
-  if (toPlay) {
-    this._videoSlot.pause()
-  } else {
-    this._videoSlot.play()
-  }
-}
-
-function $toggleUI (show) {
-  this._ui.interact.style.display = getDisplay()
-  this._ui.xBtn.style.display = getDisplay()
-
-  function getDisplay () {
-    return show ? 'block' : 'none'
   }
 }
 
@@ -111,14 +48,6 @@ function _createAndAppend (parent, tagName, className) {
   el.className = className || ''
   parent.appendChild(el)
   return el
-}
-
-function _addCssLink () {
-  var css = document.createElement('link')
-  css.rel = 'stylesheet'
-  css.href = 'ad.css'
-  parent.document.body.appendChild(css)
-  return css
 }
 
 function _normNumber (start, end, value) {
@@ -173,7 +102,10 @@ export default class Linear {
   }
 
   /**
-   * handshakeVersion
+   * The video player calls handshakeVersion immediately after loading the ad unit to indicate to the ad unit that VPAID will be used.
+   * The video player passes in its latest VPAID version string.
+   * The ad unit returns a version string minimally set to “1.0”, and of the form “major.minor.patch” (i.e. “2.1.05”).
+   * The video player must verify that it supports the particular version of VPAID or cancel the ad.
    *
    * @param {string} playerVPAIDVersion
    * @return {string} adUnit VPAID version format 'major.minor.patch' minimum '1.0'
@@ -183,14 +115,22 @@ export default class Linear {
   }
 
   /**
-   * initAd
+   * After the ad unit is loaded and the video player calls handshakeVersion, the video player calls initAd() to initialize the ad experience.
    *
-   * @param {number} width
-   * @param {number} height
-   * @param {string} viewMode
-   * @param {number} desiredBitrate
-   * @param {object} creativeData
-   * @param {object} environmentVars
+   * The video player may preload the ad unit and delay calling initAd() until nearing the ad playback time; however, the ad unit does not load its assets until initAd() is called. Once the ad unit’s assets are loaded, the ad unit sends the AdLoaded event to notify the video player that it is ready for display. Receiving the AdLoaded response indicates that the ad unit has verified that all files are ready to execute.
+   *
+   * @param {number} width    indicates the available ad display area width in pixels
+   * @param {number} height   indicates the available ad display area height in pixels
+   * @param {string} viewMode indicates either “normal”, “thumbnail”, or “fullscreen” as the view mode
+for the video player as defined by the publisher. Default is “normal”.
+   * @param {number} desiredBitrate indicates the desired bitrate as number for kilobits per second
+(kbps). The ad unit may use this information to select appropriate bitrate for any
+streaming content.
+   * @param {object} creativeData (optional) used for additional initialization data. In a VAST context,
+the ad unit should pass the value for either the Linear or Nonlinear AdParameter
+element specified in the VAST document.
+   * @param {object} environmentVars (optional) used for passing implementation-specific runtime
+variables. Refer to the language specific API description for more details.
    */
   initAd (width, height, viewMode, desiredBitrate, creativeData, environmentVars) {
     this._attributes.size.width = width
@@ -200,7 +140,7 @@ export default class Linear {
 
     this._slot = environmentVars.slot
     this._videoSlot = environmentVars.videoSlot
-    this._style = _addCssLink('ad.css')
+    this._style = loadCss('ad.css')
 
     try {
       this._parameters = JSON.parse(creativeData.AdParameters)
@@ -209,8 +149,8 @@ export default class Linear {
     }
 
     $setVideoAd.call(this)
-    this._videoSlot.addEventListener('timeupdate', $onVideoUpdated.bind(this), false)
-    this._videoSlot.addEventListener('ended', $onVideoEnded.bind(this), false)
+    this._videoSlot.addEventListener('timeupdate', handleVastTimeupdate.bind(this), false)
+    this._videoSlot.addEventListener('ended', handleVastEnded.bind(this), false)
 
     $trigger.call(this, 'AdLoaded')
   }
@@ -260,10 +200,14 @@ export default class Linear {
   }
 
   /**
-   * resizeAd
-   *
+   * [resizeAd description]
+   * @param  {number} width    The maximum display area allotted for the ad. The ad unit must resize itself to a width and height that is within the values provided. The video player must always provide width and height unless it is in fullscreen mode. In fullscreen mode, the ad unit can ignore width/height parameters and resize to any dimension.
+   * @param  {number} height   The maximum display area allotted for the ad. The ad unit must resize itself to a width and height that is within the values provided. The video player must always provide width and height unless it is in fullscreen mode. In fullscreen mode, the ad unit can ignore width/height parameters and resize to any dimension.
+   * @param  {string} viewMode Can be one of “normal” “thumbnail” or “fullscreen” to indicate the mode to which the video player is resizing. Width and height are not required when viewmode is fullscreen.
+   * @return {[type]}          [description]
    */
-  resizeAd () {
+  resizeAd (width, height, viewMode) {
+    console.log('Resize has been called but nothing is implemented')
     // TODO
   }
 
@@ -312,7 +256,10 @@ export default class Linear {
     if (!this._subscribers[event]) {
       this._subscribers[event] = []
     }
-    this._subscribers[event].push({callback: handler, context: context})
+    this._subscribers[event].push({
+      callback: handler,
+      context: context
+    })
   }
 
   /**
@@ -425,8 +372,6 @@ export default class Linear {
     if (volume < 0 || volume > 1) {
       return $throwError('volume is not valid')
     }
-
-    this._videoSlot.volume = volume
-    this._attributes.volume = volume
+    this._videoSlot.volume = this._attributes.volume = volume
   }
 }
