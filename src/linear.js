@@ -19,7 +19,7 @@ function $setVideoAd () {
   if (!videoSlot) {
     return $throwError.call(this, 'no video')
   }
-  _setSize(videoSlot, this._attributes.size)
+  _setSize(videoSlot, [this._attributes.width, this._attributes.height])
 
   if (!_setSupportedVideo(videoSlot, this._parameters.videos || [])) {
     return $throwError.call(this, 'no supported video found')
@@ -27,10 +27,10 @@ function $setVideoAd () {
 }
 
 function _setSize (el, size) {
-  el.setAttribute('width', size.width)
-  el.setAttribute('height', size.height)
-  el.style.width = size.width + 'px'
-  el.style.height = size.height + 'px'
+  el.setAttribute('width', size[0])
+  el.setAttribute('height', size[1])
+  el.style.width = size[0] + 'px'
+  el.style.height = size[1] + 'px'
 }
 
 function _setSupportedVideo (videoEl, videos) {
@@ -70,6 +70,7 @@ export default class Linear {
       companions: '',
       desiredBitrate: 256,
       duration: 30,
+      remainingTime: -1,
       expanded: false,
       icons: '',
       linear: true,
@@ -78,10 +79,8 @@ export default class Linear {
       viewMode: 'normal',
       width: 0,
       volume: 1.0,
-      size: {
-        height: 0,
-        width: 0
-      }
+      height: 0,
+      width: 0
     }
 
     // open interactive panel -> AdExpandedChange, AdInteraction
@@ -133,21 +132,14 @@ element specified in the VAST document.
 variables. Refer to the language specific API description for more details.
    */
   initAd (width, height, viewMode, desiredBitrate, creativeData, environmentVars) {
-    this._attributes.size.width = width
-    this._attributes.size.height = height
+    this._attributes.width = width
+    this._attributes.height = height
     this._attributes.viewMode = viewMode
     this._attributes.desiredBitrate = desiredBitrate
 
     this._slot = environmentVars.slot
     this._videoSlot = environmentVars.videoSlot
     this._style = loadCss('ad.css')
-
-    try {
-      this._parameters = JSON.parse(creativeData.AdParameters)
-    } catch (e) {
-      return $throwError('failed to parse creativeData.AdParameters, mandatory for this ad')
-    }
-
     $setVideoAd.call(this)
     this._videoSlot.addEventListener('timeupdate', handleVastTimeupdate.bind(this), false)
     this._videoSlot.addEventListener('ended', handleVastEnded.bind(this), false)
@@ -190,7 +182,6 @@ variables. Refer to the language specific API description for more details.
   skipAd () {
     if (this._destroyed) return
     if (!this._attributes.skippableState) return
-
     $removeAll.call(this)
     $trigger.call(this, 'AdSkipped')
     $trigger.call(this, 'AdStopped')
@@ -204,8 +195,10 @@ variables. Refer to the language specific API description for more details.
    * @return {[type]}          [description]
    */
   resizeAd (width, height, viewMode) {
-    console.log('Resize has been called but nothing is implemented')
-    // TODO
+    this._attributes.width = width
+    this._attributes.height = height
+    this._attributes.viewMode = viewMode
+    $trigger.call(this, 'AdSizeChange')
   }
 
   /**
@@ -231,7 +224,7 @@ variables. Refer to the language specific API description for more details.
    *
    */
   expandAd () {
-    // You should implement this
+    $trigger.call(this, 'AdExpandedChange')
   }
 
   /**
@@ -239,7 +232,7 @@ variables. Refer to the language specific API description for more details.
    *
    */
   collapseAd () {
-    // TODO
+    $trigger.call(this, 'AdExpandedChange')
   }
 
   /**
@@ -321,7 +314,9 @@ variables. Refer to the language specific API description for more details.
    *
    * @return {number} seconds, if not implemented will return -1, or -2 if the time is unknown (user is engaged with the ad)
    */
-  getAdRemainingTime () {}
+  getAdRemainingTime () {
+    return this._attributes.remainingTime
+  }
 
   /**
    * getAdDuration
@@ -369,5 +364,6 @@ variables. Refer to the language specific API description for more details.
       return $throwError('volume is not valid')
     }
     this._videoSlot.volume = this._attributes.volume = volume
+    $trigger.call(this, 'AdVolumeChange')
   }
 }

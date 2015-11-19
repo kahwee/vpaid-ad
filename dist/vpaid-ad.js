@@ -134,7 +134,7 @@ function $setVideoAd() {
   if (!videoSlot) {
     return $throwError.call(this, 'no video');
   }
-  _setSize(videoSlot, this._attributes.size);
+  _setSize(videoSlot, [this._attributes.width, this._attributes.height]);
 
   if (!_setSupportedVideo(videoSlot, this._parameters.videos || [])) {
     return $throwError.call(this, 'no supported video found');
@@ -142,10 +142,10 @@ function $setVideoAd() {
 }
 
 function _setSize(el, size) {
-  el.setAttribute('width', size.width);
-  el.setAttribute('height', size.height);
-  el.style.width = size.width + 'px';
-  el.style.height = size.height + 'px';
+  el.setAttribute('width', size[0]);
+  el.setAttribute('height', size[1]);
+  el.style.width = size[0] + 'px';
+  el.style.height = size[1] + 'px';
 }
 
 function _setSupportedVideo(videoEl, videos) {
@@ -188,6 +188,7 @@ var Linear = (function () {
       companions: '',
       desiredBitrate: 256,
       duration: 30,
+      remainingTime: -1,
       expanded: false,
       icons: '',
       linear: true,
@@ -196,10 +197,8 @@ var Linear = (function () {
       viewMode: 'normal',
       width: 0,
       volume: 1.0,
-      size: {
-        height: 0,
-        width: 0
-      }
+      height: 0,
+      width: 0
     };
 
     // open interactive panel -> AdExpandedChange, AdInteraction
@@ -250,21 +249,14 @@ var Linear = (function () {
   }, {
     key: 'initAd',
     value: function initAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars) {
-      this._attributes.size.width = width;
-      this._attributes.size.height = height;
+      this._attributes.width = width;
+      this._attributes.height = height;
       this._attributes.viewMode = viewMode;
       this._attributes.desiredBitrate = desiredBitrate;
 
       this._slot = environmentVars.slot;
       this._videoSlot = environmentVars.videoSlot;
       this._style = (0, _loadCss2.default)('ad.css');
-
-      try {
-        this._parameters = JSON.parse(creativeData.AdParameters);
-      } catch (e) {
-        return $throwError('failed to parse creativeData.AdParameters, mandatory for this ad');
-      }
-
       $setVideoAd.call(this);
       this._videoSlot.addEventListener('timeupdate', _vastTimeupdate2.default.bind(this), false);
       this._videoSlot.addEventListener('ended', _vastEnded2.default.bind(this), false);
@@ -316,7 +308,6 @@ var Linear = (function () {
     value: function skipAd() {
       if (this._destroyed) return;
       if (!this._attributes.skippableState) return;
-
       _toggles.$removeAll.call(this);
       _trigger2.default.call(this, 'AdSkipped');
       _trigger2.default.call(this, 'AdStopped');
@@ -333,8 +324,10 @@ var Linear = (function () {
   }, {
     key: 'resizeAd',
     value: function resizeAd(width, height, viewMode) {
-      console.log('Resize has been called but nothing is implemented');
-      // TODO
+      this._attributes.width = width;
+      this._attributes.height = height;
+      this._attributes.viewMode = viewMode;
+      _trigger2.default.call(this, 'AdSizeChange');
     }
 
     /**
@@ -368,8 +361,9 @@ var Linear = (function () {
 
   }, {
     key: 'expandAd',
-    value: function expandAd() {}
-    // You should implement this
+    value: function expandAd() {
+      _trigger2.default.call(this, 'AdExpandedChange');
+    }
 
     /**
      * collapseAd
@@ -378,8 +372,9 @@ var Linear = (function () {
 
   }, {
     key: 'collapseAd',
-    value: function collapseAd() {}
-    // TODO
+    value: function collapseAd() {
+      _trigger2.default.call(this, 'AdExpandedChange');
+    }
 
     /**
      * subscribe
@@ -486,7 +481,9 @@ var Linear = (function () {
 
   }, {
     key: 'getAdRemainingTime',
-    value: function getAdRemainingTime() {}
+    value: function getAdRemainingTime() {
+      return this._attributes.remainingTime;
+    }
 
     /**
      * getAdDuration
@@ -549,6 +546,7 @@ var Linear = (function () {
         return $throwError('volume is not valid');
       }
       this._videoSlot.volume = this._attributes.volume = volume;
+      _trigger2.default.call(this, 'AdVolumeChange');
     }
   }]);
 
