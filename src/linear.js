@@ -161,17 +161,15 @@ variables. Refer to the language specific API description for more details.
    */
   startAd () {
     this._videoSlot.play()
-
     this._ui = {}
-    this._ui.buy = _createAndAppend(this._slot, 'div', 'vpaidAdLinear')
-    this._ui.banner = _createAndAppend(this._slot, 'div', 'banner')
-    this._ui.xBtn = _createAndAppend(this._slot, 'button', 'close')
-    this._ui.interact = _createAndAppend(this._slot, 'div', 'interact')
+    // this._ui.buy = _createAndAppend(this._slot, 'div', 'vpaidAdLinear')
+    // this._ui.banner = _createAndAppend(this._slot, 'div', 'banner')
+    // this._ui.xBtn = _createAndAppend(this._slot, 'button', 'close')
+    // this._ui.interact = _createAndAppend(this._slot, 'div', 'interact')
 
-    this._ui.buy.addEventListener('click', $onClickThru.bind(this), false)
-    this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false)
-    this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false)
-
+    // this._ui.buy.addEventListener('click', $onClickThru.bind(this), false)
+    // this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false)
+    // this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false)
     $trigger.call(this, 'AdStarted')
   }
 
@@ -181,7 +179,6 @@ variables. Refer to the language specific API description for more details.
    */
   stopAd () {
     if (this._destroyed) return
-
     $removeAll.call(this)
     $trigger.call(this, 'AdStopped')
   }
@@ -234,7 +231,7 @@ variables. Refer to the language specific API description for more details.
    *
    */
   expandAd () {
-    // TODO
+    // You should implement this
   }
 
   /**
@@ -269,9 +266,8 @@ variables. Refer to the language specific API description for more details.
    * @param {string} event
    */
   unsubscribe (handler, event) {
-    var eventSubscribers = this._subscribers[event]
+    let eventSubscribers = this._subscribers[event]
     if (!Array.isArray(eventSubscribers)) return
-
     this._subscribers[event] = eventSubscribers.filter(subscriber => handler !== subscriber)
   }
 

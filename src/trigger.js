@@ -7,7 +7,6 @@
  * @return {[type]}       [description]
  */
 export default function (event, msg) {
-  console.log(`[${event}]`, msg)
   const subscribers = this._subscribers[event] || []
   subscribers.forEach(handlers => {
     handlers.callback.apply(handlers.context, msg)
