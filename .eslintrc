@@ -4,7 +4,7 @@
   "env": {
     "browser": true,
     "node": true,
-    "mocha": true,
+    "mocha": true
   },
   "rules": {
     "complexity": [1, 12],
@@ -14,12 +14,6 @@
     "max-statements": [1, 30]
   },
   "globals": {
-    "videojs": true,
-    "__DEVELOPMENT__": true,
-    "__CLIENT__": true,
-    "__SERVER__": true,
-    "__DISABLE_SSR__": true,
-    "__DEVTOOLS__": true,
-    "webpackIsomorphicTools": true
+    "videojs": true
   }
 }
