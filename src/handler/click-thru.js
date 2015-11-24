@@ -1,3 +1,5 @@
+import $trigger from '../trigger'
+
 export default function () {
   const clickThru = this._parameters.clickThru || {
     url: 'http://www.example.com',

@@ -1,7 +1,7 @@
-import $onClickThru from './handler/click-thru'
+// import $onClickThru from './handler/click-thru'
 import loadCss from './util/load-css'
 import $trigger from './trigger'
-import {$toggleExpand, $togglePlay, $toggleUI, $removeAll} from './toggles'
+import {$removeAll} from './toggles'
 import handleVastEnded from './handler/vast-ended'
 import handleVastTimeupdate from './handler/vast-timeupdate'
 
@@ -43,20 +43,12 @@ function _setSupportedVideo (videoEl, videos) {
   return true
 }
 
-function _createAndAppend (parent, tagName, className) {
-  var el = document.createElement(tagName || 'div')
-  el.className = className || ''
-  parent.appendChild(el)
-  return el
-}
-
-function _normNumber (start, end, value) {
-  return (value - start) / (end - start)
-}
-
-function _mapNumber (fromStart, fromEnd, toStart, toEnd, value) {
-  return toStart + (toEnd - toStart) * _normNumber(fromStart, fromEnd, value)
-}
+// function _createAndAppend (parent, tagName, className) {
+//   var el = document.createElement(tagName || 'div')
+//   el.className = className || ''
+//   parent.appendChild(el)
+//   return el
+// }
 
 export default class Linear {
 
@@ -74,13 +66,11 @@ export default class Linear {
       expanded: false,
       icons: '',
       linear: true,
-      remainingTime: 10,
       skippableState: false,
       viewMode: 'normal',
       width: 0,
-      volume: 1.0,
       height: 0,
-      width: 0
+      volume: 1.0
     }
 
     // open interactive panel -> AdExpandedChange, AdInteraction

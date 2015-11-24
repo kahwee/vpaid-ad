@@ -1,5 +1,13 @@
 import $trigger from '../trigger'
 
+function _normNumber (start, end, value) {
+  return (value - start) / (end - start)
+}
+
+function _mapNumber (fromStart, fromEnd, toStart, toEnd, value) {
+  return toStart + (toEnd - toStart) * _normNumber(fromStart, fromEnd, value)
+}
+
 export default function () {
   if (this._destroyed) return
 

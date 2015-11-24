@@ -160,12 +160,12 @@ function _setSupportedVideo(videoEl, videos) {
   return true;
 }
 
-function _createAndAppend(parent, tagName, className) {
-  var el = document.createElement(tagName || 'div');
-  el.className = className || '';
-  parent.appendChild(el);
-  return el;
-}
+// function _createAndAppend(parent, tagName, className) {
+//   var el = document.createElement(tagName || 'div');
+//   el.className = className || '';
+//   parent.appendChild(el);
+//   return el;
+// }
 
 function _normNumber(start, end, value) {
   return (value - start) / (end - start);
