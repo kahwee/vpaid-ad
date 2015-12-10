@@ -6,28 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function () {
-  var clickThru = this._parameters.clickThru || {
-    url: 'http://www.example.com',
-    trackID: 123,
-    playerHandles: false
-  };
-
-  $trigger.call(this, 'AdClickThru', [clickThru.url, clickThru.trackID, clickThru.playerHandles]);
-
-  // Babel 6 can'mt seem to compile this
-  // if (!clickThru.playerHandles) {
-  //   window.open(clickThru.url, '_blank')
-  // }
-};
-
-},{}],2:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function () {
   if (this._destroyed) return;
 
   _toggles.$removeAll.call(this);
@@ -42,7 +20,7 @@ var _toggles = require('../toggles');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../toggles":6,"../trigger":7}],3:[function(require,module,exports){
+},{"../toggles":5,"../trigger":6}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -72,7 +50,15 @@ var _trigger2 = _interopRequireDefault(_trigger);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../trigger":7}],4:[function(require,module,exports){
+function _normNumber(start, end, value) {
+  return (value - start) / (end - start);
+}
+
+function _mapNumber(fromStart, fromEnd, toStart, toEnd, value) {
+  return toStart + (toEnd - toStart) * _normNumber(fromStart, fromEnd, value);
+}
+
+},{"../trigger":6}],3:[function(require,module,exports){
 'use strict';
 
 var _linear = require('./linear');
@@ -85,18 +71,14 @@ window.getVPAIDAd = function () {
   return new _linear2.default();
 };
 
-},{"./linear":5}],5:[function(require,module,exports){
+},{"./linear":4}],4:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); // import $onClickThru from './handler/click-thru'
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _clickThru = require('./handler/click-thru');
-
-var _clickThru2 = _interopRequireDefault(_clickThru);
 
 var _loadCss = require('./util/load-css');
 
@@ -160,20 +142,12 @@ function _setSupportedVideo(videoEl, videos) {
   return true;
 }
 
-// function _createAndAppend(parent, tagName, className) {
-//   var el = document.createElement(tagName || 'div');
-//   el.className = className || '';
-//   parent.appendChild(el);
-//   return el;
+// function _createAndAppend (parent, tagName, className) {
+//   var el = document.createElement(tagName || 'div')
+//   el.className = className || ''
+//   parent.appendChild(el)
+//   return el
 // }
-
-function _normNumber(start, end, value) {
-  return (value - start) / (end - start);
-}
-
-function _mapNumber(fromStart, fromEnd, toStart, toEnd, value) {
-  return toStart + (toEnd - toStart) * _normNumber(fromStart, fromEnd, value);
-}
 
 var Linear = (function () {
   function Linear() {
@@ -190,15 +164,13 @@ var Linear = (function () {
       duration: 30,
       remainingTime: -1,
       expanded: false,
-      icons: '',
+      icons: false,
       linear: true,
-      remainingTime: 10,
       skippableState: false,
       viewMode: 'normal',
       width: 0,
-      volume: 1.0,
       height: 0,
-      width: 0
+      volume: 1.0
     };
 
     // open interactive panel -> AdExpandedChange, AdInteraction
@@ -555,7 +527,7 @@ var Linear = (function () {
 
 exports.default = Linear;
 
-},{"./handler/click-thru":1,"./handler/vast-ended":2,"./handler/vast-timeupdate":3,"./toggles":6,"./trigger":7,"./util/load-css":8}],6:[function(require,module,exports){
+},{"./handler/vast-ended":1,"./handler/vast-timeupdate":2,"./toggles":5,"./trigger":6,"./util/load-css":7}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -608,7 +580,7 @@ function $removeAll() {
   this._ui = null;
 }
 
-},{"./trigger":7}],7:[function(require,module,exports){
+},{"./trigger":6}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -622,7 +594,7 @@ exports.default = function (event, msg) {
   });
 };
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -638,4 +610,4 @@ exports.default = function (url) {
   return link;
 };
 
-},{}]},{},[4]);
+},{}]},{},[3]);
