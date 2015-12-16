@@ -4,6 +4,7 @@ import $trigger from './trigger'
 import {$removeAll} from './toggles'
 import handleVastEnded from './handler/vast-ended'
 import handleVastTimeupdate from './handler/vast-timeupdate'
+import objectAssign from 'object-assign'
 
 function $enableSkippable () {
   this._attributes.skippableState = true
@@ -72,6 +73,8 @@ export default class Linear {
       height: 0,
       volume: 1.0
     }
+
+    this.previousAttributes = objectAssign({}, this._attributes)
 
     // open interactive panel -> AdExpandedChange, AdInteraction
     // when close panel -> AdExpandedChange, AdInteraction
@@ -350,10 +353,15 @@ variables. Refer to the language specific API description for more details.
    * @param {number} volume  between 0 and 1
    */
   setAdVolume (volume) {
+    if (this.previousAttributes.volume === volume) {
+      // no change, no fire
+      return
+    }
     if (volume < 0 || volume > 1) {
       return $throwError('volume is not valid')
     }
     this._videoSlot.volume = this._attributes.volume = volume
     $trigger.call(this, 'AdVolumeChange')
+    this.previousAttributes.volume = volume
   }
 }

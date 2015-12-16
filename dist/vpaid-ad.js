@@ -1,4 +1,45 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/* eslint-disable no-unused-vars */
+'use strict';
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+module.exports = Object.assign || function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (Object.getOwnPropertySymbols) {
+			symbols = Object.getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+
+},{}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20,7 +61,7 @@ var _toggles = require('../toggles');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../toggles":5,"../trigger":6}],2:[function(require,module,exports){
+},{"../toggles":6,"../trigger":7}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -58,7 +99,7 @@ function _mapNumber(fromStart, fromEnd, toStart, toEnd, value) {
   return toStart + (toEnd - toStart) * _normNumber(fromStart, fromEnd, value);
 }
 
-},{"../trigger":6}],3:[function(require,module,exports){
+},{"../trigger":7}],4:[function(require,module,exports){
 'use strict';
 
 var _linear = require('./linear');
@@ -71,7 +112,7 @@ window.getVPAIDAd = function () {
   return new _linear2.default();
 };
 
-},{"./linear":4}],4:[function(require,module,exports){
+},{"./linear":5}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); // import $onClickThru from './handler/click-thru'
@@ -97,6 +138,10 @@ var _vastEnded2 = _interopRequireDefault(_vastEnded);
 var _vastTimeupdate = require('./handler/vast-timeupdate');
 
 var _vastTimeupdate2 = _interopRequireDefault(_vastTimeupdate);
+
+var _objectAssign = require('object-assign');
+
+var _objectAssign2 = _interopRequireDefault(_objectAssign);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -172,6 +217,8 @@ var Linear = (function () {
       height: 0,
       volume: 1.0
     };
+
+    this.previousAttributes = (0, _objectAssign2.default)({}, this._attributes);
 
     // open interactive panel -> AdExpandedChange, AdInteraction
     // when close panel -> AdExpandedChange, AdInteraction
@@ -514,11 +561,16 @@ var Linear = (function () {
   }, {
     key: 'setAdVolume',
     value: function setAdVolume(volume) {
+      if (this.previousAttributes.volume === volume) {
+        // no change, no fire
+        return;
+      }
       if (volume < 0 || volume > 1) {
         return $throwError('volume is not valid');
       }
       this._videoSlot.volume = this._attributes.volume = volume;
       _trigger2.default.call(this, 'AdVolumeChange');
+      this.previousAttributes.volume = volume;
     }
   }]);
 
@@ -527,7 +579,7 @@ var Linear = (function () {
 
 exports.default = Linear;
 
-},{"./handler/vast-ended":1,"./handler/vast-timeupdate":2,"./toggles":5,"./trigger":6,"./util/load-css":7}],5:[function(require,module,exports){
+},{"./handler/vast-ended":2,"./handler/vast-timeupdate":3,"./toggles":6,"./trigger":7,"./util/load-css":8,"object-assign":1}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -580,7 +632,7 @@ function $removeAll() {
   this._ui = null;
 }
 
-},{"./trigger":6}],6:[function(require,module,exports){
+},{"./trigger":7}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -594,7 +646,7 @@ exports.default = function (event, msg) {
   });
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -610,4 +662,4 @@ exports.default = function (url) {
   return link;
 };
 
-},{}]},{},[3]);
+},{}]},{},[4]);
