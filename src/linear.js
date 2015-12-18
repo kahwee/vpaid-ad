@@ -1,4 +1,3 @@
-// import $onClickThru from './handler/click-thru'
 import loadCss from './util/load-css'
 import $trigger from './trigger'
 import {$removeAll} from './toggles'
@@ -91,6 +90,11 @@ export default class Linear {
     this._lastQuartilePosition = this._quartileEvents[0]
 
     this._parameters = {}
+  }
+
+  set (attribute, newValue) {
+    this.previousAttributes[attribute] = this._attributes[attribute]
+    this._attributes[attribute] = newValue
   }
 
   /**
@@ -217,6 +221,7 @@ variables. Refer to the language specific API description for more details.
    *
    */
   expandAd () {
+    this.set('expanded', true)
     $trigger.call(this, 'AdExpandedChange')
   }
 
@@ -225,6 +230,7 @@ variables. Refer to the language specific API description for more details.
    *
    */
   collapseAd () {
+    this.set('expanded', false)
     $trigger.call(this, 'AdExpandedChange')
   }
 
@@ -360,8 +366,8 @@ variables. Refer to the language specific API description for more details.
     if (volume < 0 || volume > 1) {
       return $throwError('volume is not valid')
     }
-    this._videoSlot.volume = this._attributes.volume = volume
+    this.set('volume', volume)
+    this._videoSlot.volume = volume
     $trigger.call(this, 'AdVolumeChange')
-    this.previousAttributes.volume = volume
   }
 }

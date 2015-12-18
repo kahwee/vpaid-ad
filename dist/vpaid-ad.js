@@ -115,7 +115,7 @@ window.getVPAIDAd = function () {
 },{"./linear":5}],5:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); // import $onClickThru from './handler/click-thru'
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -230,17 +230,24 @@ var Linear = (function () {
     this._parameters = {};
   }
 
-  /**
-   * The video player calls handshakeVersion immediately after loading the ad unit to indicate to the ad unit that VPAID will be used.
-   * The video player passes in its latest VPAID version string.
-   * The ad unit returns a version string minimally set to “1.0”, and of the form “major.minor.patch” (i.e. “2.1.05”).
-   * The video player must verify that it supports the particular version of VPAID or cancel the ad.
-   *
-   * @param {string} playerVPAIDVersion
-   * @return {string} adUnit VPAID version format 'major.minor.patch' minimum '1.0'
-   */
-
   _createClass(Linear, [{
+    key: 'set',
+    value: function set(attribute, newValue) {
+      this.previousAttributes[attribute] = this._attributes[attribute];
+      this._attributes[attribute] = newValue;
+    }
+
+    /**
+     * The video player calls handshakeVersion immediately after loading the ad unit to indicate to the ad unit that VPAID will be used.
+     * The video player passes in its latest VPAID version string.
+     * The ad unit returns a version string minimally set to “1.0”, and of the form “major.minor.patch” (i.e. “2.1.05”).
+     * The video player must verify that it supports the particular version of VPAID or cancel the ad.
+     *
+     * @param {string} playerVPAIDVersion
+     * @return {string} adUnit VPAID version format 'major.minor.patch' minimum '1.0'
+     */
+
+  }, {
     key: 'handshakeVersion',
     value: function handshakeVersion(playerVPAIDVersion) {
       return '2.0';
@@ -381,6 +388,7 @@ var Linear = (function () {
   }, {
     key: 'expandAd',
     value: function expandAd() {
+      this.set('expanded', true);
       _trigger2.default.call(this, 'AdExpandedChange');
     }
 
@@ -392,6 +400,7 @@ var Linear = (function () {
   }, {
     key: 'collapseAd',
     value: function collapseAd() {
+      this.set('expanded', false);
       _trigger2.default.call(this, 'AdExpandedChange');
     }
 
@@ -568,9 +577,9 @@ var Linear = (function () {
       if (volume < 0 || volume > 1) {
         return $throwError('volume is not valid');
       }
-      this._videoSlot.volume = this._attributes.volume = volume;
+      this.set('volume', volume);
+      this._videoSlot.volume = volume;
       _trigger2.default.call(this, 'AdVolumeChange');
-      this.previousAttributes.volume = volume;
     }
   }]);
 
