@@ -1,3 +1,7 @@
+# v1.0.10
+
+* Add object-assign as dep.
+
 # v1.0.9
 
 * added set()
