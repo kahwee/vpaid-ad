@@ -46,5 +46,14 @@
   },
   "dependencies": {
     "object-assign": "^4.0.1"
-  }
+  },
+  "keywords": [
+    "vpaid",
+    "ad",
+    "adtech",
+    "vast",
+    "debugging",
+    "advertisement",
+    "unit"
+  ]
 }
