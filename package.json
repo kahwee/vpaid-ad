@@ -33,7 +33,7 @@
     "babelify": "^7.2.0",
     "browserify": "^13.0.0",
     "gulp": "^3.9.1",
-    "standard": "^6.0.5"
+    "standard": "^6.0.6"
   },
   "browserify": {
     "transform": [
