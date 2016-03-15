@@ -1,3 +1,8 @@
+# v1.0.11
+
+* Include `lib` as well now.
+* Remove `gulp` from devDeps.
+
 # v1.0.10
 
 * Add object-assign as dep.
