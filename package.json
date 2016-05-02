@@ -48,7 +48,7 @@
     ]
   },
   "dependencies": {
-    "object-assign": "^4.0.1"
+    "object-assign": "^4.1.0"
   },
   "keywords": [
     "vpaid",
