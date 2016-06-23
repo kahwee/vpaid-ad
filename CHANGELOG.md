@@ -1,3 +1,7 @@
+# v1.0.12
+
+* Remove `object-assign`, push that to `babel` plugin
+
 # v1.0.11
 
 * Include `lib` as well now.
@@ -5,7 +9,7 @@
 
 # v1.0.10
 
-* Add object-assign as dep.
+* Add `object-assign` as dep.
 
 # v1.0.9
 

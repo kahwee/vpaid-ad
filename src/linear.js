@@ -3,7 +3,6 @@ import $trigger from './trigger'
 import {$removeAll} from './toggles'
 import handleVastEnded from './handler/vast-ended'
 import handleVastTimeupdate from './handler/vast-timeupdate'
-import objectAssign from 'object-assign'
 
 function $enableSkippable () {
   this._attributes.skippableState = true
@@ -73,7 +72,7 @@ export default class Linear {
       volume: 1.0
     }
 
-    this.previousAttributes = objectAssign({}, this._attributes)
+    this.previousAttributes = Object.assign({}, this._attributes)
 
     // open interactive panel -> AdExpandedChange, AdInteraction
     // when close panel -> AdExpandedChange, AdInteraction
