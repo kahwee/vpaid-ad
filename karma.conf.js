@@ -8,7 +8,7 @@ module.exports = function (config) {
   preprocessors['./*.js'] = ['coverage']
   preprocessors['./tests/**/*.js'] = ['browserify']
 
-  var browsers = headless ? ['Firefox'] : ['Chrome']
+  var browsers = headless ? ['Chrome_Travis'] : ['Chrome']
 
   config.set({
     basePath: '.',
@@ -63,6 +63,12 @@ module.exports = function (config) {
     },
     mochaReporter: {
       divider: ''
+    },
+    customLaunchers: {
+      Chrome_Travis: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
     },
     // logLevel: 'INFO',
     singleRun: headless
