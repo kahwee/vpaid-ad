@@ -23,6 +23,12 @@ module.exports = function (config) {
         included: true,
         served: true,
         watched: false
+      },
+      {
+        pattern: 'tests/fixtures/*.mp4',
+        included: false,
+        served: true,
+        watched: false
       }
     ],
     browserify: {
@@ -59,7 +65,7 @@ module.exports = function (config) {
       // Have phantomjs exit if a ResourceError is encountered (useful if karma exits without killing phantom)
       exitOnResourceError: true
     },
+    // logLevel: 'INFO',
     singleRun: headless
-  // logLevel: 'DEBUG'
   })
 }

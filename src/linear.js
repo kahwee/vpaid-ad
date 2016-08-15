@@ -7,20 +7,16 @@ function $enableSkippable () {
   this._attributes.skippableState = true
 }
 
-function $throwError (msg) {
-  this.emit('AdError', msg)
-}
-
 function $setVideoAd () {
   var videoSlot = this._videoSlot
 
   if (!videoSlot) {
-    return $throwError.call(this, 'no video')
+    return this.emit('AdError', 'no video')
   }
   _setSize(videoSlot, [this._attributes.width, this._attributes.height])
 
-  if (!_setSupportedVideo(videoSlot, this._parameters.videos || [])) {
-    return $throwError.call(this, 'no supported video found')
+  if (!_setSupportedVideo(videoSlot, this._options.videos || [])) {
+    return this.emit('AdError', 'no supported video found')
   }
 }
 
@@ -50,7 +46,7 @@ function _setSupportedVideo (videoEl, videos) {
 
 export default class Linear extends TinyEmitter {
 
-  constructor () {
+  constructor (options = {}) {
     super()
     this._slot = null
     this._videoSlot = null
@@ -86,7 +82,7 @@ export default class Linear extends TinyEmitter {
 
     this._lastQuartilePosition = this._quartileEvents[0]
 
-    this._parameters = {}
+    this._options = options
   }
 
   set (attribute, newValue) {
@@ -146,17 +142,22 @@ variables. Refer to the language specific API description for more details.
    *
    */
   startAd () {
-    this._videoSlot.play()
+    this._videoSlot.addEventListener('loadeddata', () => {
+      console.log('hi2')
+    }, false)
+    this._videoSlot.load()
+
+      this._videoSlot.play()
+    this.emit('AdStarted')
     this._ui = {}
     // this._ui.buy = _createAndAppend(this._slot, 'div', 'vpaidAdLinear')
     // this._ui.banner = _createAndAppend(this._slot, 'div', 'banner')
     // this._ui.xBtn = _createAndAppend(this._slot, 'button', 'close')
     // this._ui.interact = _createAndAppend(this._slot, 'div', 'interact')
 
-    // this._ui.buy.addEventListener('click', $onClickThru.bind(this), false)
-    // this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false)
-    // this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false)
-    this.emit('AdStarted')
+  // this._ui.buy.addEventListener('click', $onClickThru.bind(this), false)
+  // this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false)
+  // this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false)
   }
 
   /**
@@ -353,7 +354,7 @@ variables. Refer to the language specific API description for more details.
       return
     }
     if (volume < 0 || volume > 1) {
-      return $throwError('volume is not valid')
+      return this.emit('AdError', 'volume is not valid')
     }
     this.set('volume', volume)
     this._videoSlot.volume = volume

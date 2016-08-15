@@ -11,6 +11,9 @@
 *.png binary
 *.jpg binary
 *.gif binary
+*.mp4 binary
+*.ogg binary
+*.ogv binary
 
 *.min.js merge=ours
 *.js.map merge=ours
