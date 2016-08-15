@@ -8,7 +8,7 @@ module.exports = function (config) {
   preprocessors['./*.js'] = ['coverage']
   preprocessors['./tests/**/*.js'] = ['browserify']
 
-  var browsers = headless ? ['PhantomJS'] : ['Chrome']
+  var browsers = headless ? ['Firefox'] : ['Chrome']
 
   config.set({
     basePath: '.',
@@ -63,10 +63,6 @@ module.exports = function (config) {
     },
     mochaReporter: {
       divider: ''
-    },
-    phantomjsLauncher: {
-      // Have phantomjs exit if a ResourceError is encountered (useful if karma exits without killing phantom)
-      exitOnResourceError: true
     },
     // logLevel: 'INFO',
     singleRun: headless
