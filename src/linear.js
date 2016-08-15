@@ -15,7 +15,7 @@ function $setVideoAd () {
   }
   _setSize(videoSlot, [this._attributes.width, this._attributes.height])
 
-  if (!_setSupportedVideo(videoSlot, this._options.videos || [])) {
+  if (!_setSupportedVideo(videoSlot, this._options.videos)) {
     return this.emit('AdError', 'no supported video found')
   }
 }
@@ -48,8 +48,7 @@ export default class Linear extends TinyEmitter {
 
   constructor (options = {}) {
     super()
-    this._slot = null
-    this._videoSlot = null
+    this._ui = {}
 
     this._attributes = {
       companions: '',
@@ -83,6 +82,7 @@ export default class Linear extends TinyEmitter {
     this._lastQuartilePosition = this._quartileEvents[0]
 
     this._options = options
+    this._options.videos = this._options.videos || []
   }
 
   set (attribute, newValue) {
@@ -129,11 +129,9 @@ variables. Refer to the language specific API description for more details.
 
     this._slot = environmentVars.slot
     this._videoSlot = environmentVars.videoSlot
-    // this._style = loadCss('ad.css')
     $setVideoAd.call(this)
     this._videoSlot.addEventListener('timeupdate', handleVastTimeupdate.bind(this), false)
     this._videoSlot.addEventListener('ended', handleVastEnded.bind(this), false)
-
     this.emit('AdLoaded')
   }
 
@@ -143,21 +141,9 @@ variables. Refer to the language specific API description for more details.
    */
   startAd () {
     this._videoSlot.addEventListener('loadeddata', () => {
-      console.log('hi2')
+      this.emit('AdStarted')
     }, false)
     this._videoSlot.load()
-
-      this._videoSlot.play()
-    this.emit('AdStarted')
-    this._ui = {}
-    // this._ui.buy = _createAndAppend(this._slot, 'div', 'vpaidAdLinear')
-    // this._ui.banner = _createAndAppend(this._slot, 'div', 'banner')
-    // this._ui.xBtn = _createAndAppend(this._slot, 'button', 'close')
-    // this._ui.interact = _createAndAppend(this._slot, 'div', 'interact')
-
-  // this._ui.buy.addEventListener('click', $onClickThru.bind(this), false)
-  // this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false)
-  // this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false)
   }
 
   /**

@@ -29,7 +29,6 @@ export function $toggleUI (show) {
 export function $removeAll () {
   this._destroyed = true
   this._videoSlot.src = ''
-  this._style.parentElement.removeChild(this._style)
   this._slot.innerHTML = ''
   this._ui = null
 }
