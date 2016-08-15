@@ -2,8 +2,6 @@ sudo: false
 language: node_js
 node_js:
   - "6"
-addons:
-  firefox: latest
 before_script:
   - export CHROME_BIN=chromium-browser
   - "export DISPLAY=:99.0"
