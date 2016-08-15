@@ -1,7 +1,7 @@
 const VideoTracker = require('../src/video-tracker').default
 const TinyEmitter = require('tiny-emitter')
 
-describe.only('VideoTracker', function () {
+describe('VideoTracker', function () {
   describe('with videos', function () {
     this.timeout(10000)
     let videoSlot1
