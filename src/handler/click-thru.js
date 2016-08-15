@@ -1,5 +1,3 @@
-import $trigger from '../trigger'
-
 export default function () {
   const clickThru = this._parameters.clickThru || {
     url: 'http://www.example.com',
@@ -7,7 +5,7 @@ export default function () {
     playerHandles: false
   }
 
-  $trigger.call(this, 'AdClickThru', [clickThru.url, clickThru.trackID, clickThru.playerHandles])
+  this.emit('AdClickThru', [clickThru.url, clickThru.trackID, clickThru.playerHandles])
 
   // Babel 6 can'mt seem to compile this
   // if (!clickThru.playerHandles) {

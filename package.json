@@ -1,15 +1,16 @@
 {
   "name": "vpaid-ad",
-  "version": "1.0.14",
+  "version": "2.0.0",
   "description": "VPAID ad class for extending purposes.",
   "main": "lib/index.js",
   "scripts": {
+    "coverage-ci": "codecov && rm -rf ./coverage",
     "lint": "standard",
     "babel": "./node_modules/.bin/babel -d lib src",
     "browserify": "browserify src/index.js -o dist/vpaid-ad.js",
     "watchify": "watchify src/index.js -o dist/vpaid-ad.js",
     "build": "npm run lint && npm run babel && npm run browserify",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "karma start"
   },
   "repository": {
     "type": "git",
@@ -23,11 +24,25 @@
   "homepage": "https://github.com/kahwee/vpaid-ad#readme",
   "devDependencies": {
     "babel-cli": "^6.11.4",
-    "babel-core": "^6.11.4",
-    "babel-preset-es2015": "^6.9.0",
+    "babel-core": "^6.13.2",
+    "babel-istanbul": "^0.11.0",
+    "babel-polyfill": "^6.13.0",
+    "babel-preset-es2015": "^6.13.2",
     "babelify": "^7.3.0",
     "browserify": "^13.1.0",
-    "standard": "^7.1.2"
+    "browserify-istanbul": "^2.0.0",
+    "chai": "^3.5.0",
+    "codecov": "^1.0.1",
+    "karma": "^1.2.0",
+    "karma-browserify": "^5.1.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^1.0.1",
+    "karma-coverage": "^1.1.1",
+    "karma-mocha": "^1.1.1",
+    "karma-mocha-reporter": "^2.1.0",
+    "mocha": "^3.0.2",
+    "standard": "^7.1.2",
+    "watchify": "^3.7.0"
   },
   "browserify": {
     "transform": [
@@ -67,5 +82,8 @@
     "unit",
     "vast",
     "advertising"
-  ]
+  ],
+  "dependencies": {
+    "tiny-emitter": "^1.1.0"
+  }
 }

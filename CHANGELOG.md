@@ -1,9 +1,10 @@
-# v1.0.12
+# v2.0.0 -- 2016-08-14
+* Use tiny-emitter instead
 
+# v1.0.12
 * Remove `object-assign`, push that to `babel` plugin
 
 # v1.0.11
-
 * Include `lib` as well now.
 * Remove `gulp` from devDeps.
 
