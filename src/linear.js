@@ -49,6 +49,7 @@ export default class Linear extends TinyEmitter {
     super()
     this._ui = {}
     this.quartileIndexEmitted = -1
+    this.hasEngaged = false
 
     this._attributes = {
       companions: '',
@@ -280,7 +281,11 @@ variables. Refer to the language specific API description for more details.
    * @return {number} seconds, if not implemented will return -1, or -2 if the time is unknown (user is engaged with the ad)
    */
   getAdRemainingTime () {
-    return this._attributes.remainingTime
+    if (this.hasEngaged) {
+      return -2
+    } else {
+      return this._videoSlot.duration - this._videoSlot.currentTime
+    }
   }
 
   /**
@@ -289,7 +294,11 @@ variables. Refer to the language specific API description for more details.
    * @return {number} seconds, if not implemented will return -1, or -2 if the time is unknown (user is engaged with the ad)
    */
   getAdDuration () {
-    return this._attributes.duration
+    if (this.hasEngaged) {
+      return -2
+    } else {
+      return this._videoSlot.duration
+    }
   }
 
   /**

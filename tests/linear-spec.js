@@ -76,6 +76,13 @@ describe('Linear', function () {
         expect(linear._attributes.volume).to.equal(0.5)
         done()
       })
+
+      it('should emit AdError is set with invalid volume', function (done) {
+        linear.subscribe(function () {
+          done()
+        }, 'AdError')
+        linear.setAdVolume(1.5)
+      })
     })
   })
 
@@ -130,6 +137,20 @@ describe('Linear', function () {
           done()
         }, 'AdVideoStart')
         linear1._videoSlot.play()
+      })
+
+      it('should return valid AdDuration', function() {
+        linear1.hasEngaged = false
+        expect(linear1.getAdDuration()).to.be.above(0)
+        linear1.hasEngaged = true
+        expect(linear1.getAdDuration()).to.be.equal(-2)
+      })
+
+      it('should return valid AdRemainingTime', function() {
+        linear1.hasEngaged = false
+        expect(linear1.getAdRemainingTime()).to.be.above(0)
+        linear1.hasEngaged = true
+        expect(linear1.getAdRemainingTime()).to.be.equal(-2)
       })
 
       it('should pauseAd()', function (done) {
