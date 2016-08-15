@@ -3,7 +3,7 @@ const TinyEmitter = require('tiny-emitter')
 
 describe.only('VideoTracker', function () {
   describe('with videos', function () {
-    this.wait = 10000
+    this.timeout(10000)
     let videoSlot1
     let videoSlot2
     let tracker1
