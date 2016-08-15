@@ -1,4 +1,72 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+function E () {
+  // Keep this empty so it's easier to inherit from
+  // (via https://github.com/lipsmack from https://github.com/scottcorgan/tiny-emitter/issues/3)
+}
+
+E.prototype = {
+  on: function (name, callback, ctx) {
+    var e = this.e || (this.e = {});
+
+    (e[name] || (e[name] = [])).push({
+      fn: callback,
+      ctx: ctx
+    });
+
+    return this;
+  },
+
+  once: function (name, callback, ctx) {
+    var self = this;
+    function listener () {
+      self.off(name, listener);
+      callback.apply(ctx, arguments);
+    };
+
+    listener._ = callback
+    return this.on(name, listener, ctx);
+  },
+
+  emit: function (name) {
+    var data = [].slice.call(arguments, 1);
+    var evtArr = ((this.e || (this.e = {}))[name] || []).slice();
+    var i = 0;
+    var len = evtArr.length;
+
+    for (i; i < len; i++) {
+      evtArr[i].fn.apply(evtArr[i].ctx, data);
+    }
+
+    return this;
+  },
+
+  off: function (name, callback) {
+    var e = this.e || (this.e = {});
+    var evts = e[name];
+    var liveEvents = [];
+
+    if (evts && callback) {
+      for (var i = 0, len = evts.length; i < len; i++) {
+        if (evts[i].fn !== callback && evts[i].fn._ !== callback)
+          liveEvents.push(evts[i]);
+      }
+    }
+
+    // Remove event from queue to prevent memory leak
+    // Suggested by https://github.com/lazd
+    // Ref: https://github.com/scottcorgan/tiny-emitter/commit/c6ebfaa9bc973b33d110a84a307742b7cf94c953#commitcomment-5024910
+
+    (liveEvents.length)
+      ? e[name] = liveEvents
+      : delete e[name];
+
+    return this;
+  }
+};
+
+module.exports = E;
+
+},{}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -9,19 +77,13 @@ exports.default = function () {
   if (this._destroyed) return;
 
   _toggles.$removeAll.call(this);
-  _trigger2.default.call(this, 'AdStopped');
+  this.emit('AdStopped');
 };
-
-var _trigger = require('../trigger');
-
-var _trigger2 = _interopRequireDefault(_trigger);
 
 var _toggles = require('../toggles');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-},{"../toggles":5,"../trigger":6}],2:[function(require,module,exports){
-'use strict';
+},{"../toggles":6}],3:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -38,17 +100,11 @@ exports.default = function () {
 
   if (last.hook) last.hook();
 
-  _trigger2.default.call(this, last.event);
+  this.emit(last.event);
 
   var quartile = this._quartileEvents;
   this._lastQuartilePosition = quartile[quartile.indexOf(last) + 1];
 };
-
-var _trigger = require('../trigger');
-
-var _trigger2 = _interopRequireDefault(_trigger);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _normNumber(start, end, value) {
   return (value - start) / (end - start);
@@ -58,7 +114,7 @@ function _mapNumber(fromStart, fromEnd, toStart, toEnd, value) {
   return toStart + (toEnd - toStart) * _normNumber(fromStart, fromEnd, value);
 }
 
-},{"../trigger":6}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 var _linear = require('./linear');
@@ -71,24 +127,14 @@ window.getVPAIDAd = function () {
   return new _linear2.default();
 };
 
-},{"./linear":4}],4:[function(require,module,exports){
+},{"./linear":5}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _loadCss = require('./util/load-css');
-
-var _loadCss2 = _interopRequireDefault(_loadCss);
-
-var _trigger = require('./trigger');
-
-var _trigger2 = _interopRequireDefault(_trigger);
 
 var _toggles = require('./toggles');
 
@@ -104,12 +150,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TinyEmitter = require('tiny-emitter');
+
+
 function $enableSkippable() {
   this._attributes.skippableState = true;
 }
 
 function $throwError(msg) {
-  _trigger2.default.call(this, 'AdError', msg);
+  this.emit('AdError', msg);
 }
 
 function $setVideoAd() {
@@ -151,16 +204,18 @@ function _setSupportedVideo(videoEl, videos) {
 //   return el
 // }
 
-var Linear = function () {
+var Linear = function (_TinyEmitter) {
+  _inherits(Linear, _TinyEmitter);
+
   function Linear() {
     _classCallCheck(this, Linear);
 
-    this._slot = null;
-    this._videoSlot = null;
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Linear).call(this));
 
-    this._subscribers = {};
+    _this._slot = null;
+    _this._videoSlot = null;
 
-    this._attributes = {
+    _this._attributes = {
       companions: '',
       desiredBitrate: 256,
       duration: 30,
@@ -175,16 +230,17 @@ var Linear = function () {
       volume: 1.0
     };
 
-    this.previousAttributes = _extends({}, this._attributes);
+    _this.previousAttributes = Object.assign({}, _this._attributes);
 
     // open interactive panel -> AdExpandedChange, AdInteraction
     // when close panel -> AdExpandedChange, AdInteraction
 
-    this._quartileEvents = [{ event: 'AdVideoStart', position: 0 }, { event: 'AdVideoFirstQuartile', position: 25 }, { event: 'AdVideoMidpoint', position: 50 }, { event: 'AdSkippableStateChange', position: 65, hook: $enableSkippable.bind(this) }, { event: 'AdVideoThirdQuartile', position: 75 }, { event: 'AdVideoComplete', position: 100 }];
+    _this._quartileEvents = [{ event: 'AdVideoStart', position: 0 }, { event: 'AdVideoFirstQuartile', position: 25 }, { event: 'AdVideoMidpoint', position: 50 }, { event: 'AdSkippableStateChange', position: 65, hook: $enableSkippable.bind(_this) }, { event: 'AdVideoThirdQuartile', position: 75 }, { event: 'AdVideoComplete', position: 100 }];
 
-    this._lastQuartilePosition = this._quartileEvents[0];
+    _this._lastQuartilePosition = _this._quartileEvents[0];
 
-    this._parameters = {};
+    _this._parameters = {};
+    return _this;
   }
 
   _createClass(Linear, [{
@@ -239,12 +295,12 @@ var Linear = function () {
 
       this._slot = environmentVars.slot;
       this._videoSlot = environmentVars.videoSlot;
-      this._style = (0, _loadCss2.default)('ad.css');
+      // this._style = loadCss('ad.css')
       $setVideoAd.call(this);
       this._videoSlot.addEventListener('timeupdate', _vastTimeupdate2.default.bind(this), false);
       this._videoSlot.addEventListener('ended', _vastEnded2.default.bind(this), false);
 
-      _trigger2.default.call(this, 'AdLoaded');
+      this.emit('AdLoaded');
     }
 
     /**
@@ -265,7 +321,7 @@ var Linear = function () {
       // this._ui.buy.addEventListener('click', $onClickThru.bind(this), false)
       // this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false)
       // this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false)
-      _trigger2.default.call(this, 'AdStarted');
+      this.emit('AdStarted');
     }
 
     /**
@@ -278,7 +334,7 @@ var Linear = function () {
     value: function stopAd() {
       if (this._destroyed) return;
       _toggles.$removeAll.call(this);
-      _trigger2.default.call(this, 'AdStopped');
+      this.emit('AdStopped');
     }
 
     /**
@@ -292,8 +348,8 @@ var Linear = function () {
       if (this._destroyed) return;
       if (!this._attributes.skippableState) return;
       _toggles.$removeAll.call(this);
-      _trigger2.default.call(this, 'AdSkipped');
-      _trigger2.default.call(this, 'AdStopped');
+      this.emit('AdSkipped');
+      this.emit('AdStopped');
     }
 
     /**
@@ -310,7 +366,7 @@ var Linear = function () {
       this._attributes.width = width;
       this._attributes.height = height;
       this._attributes.viewMode = viewMode;
-      _trigger2.default.call(this, 'AdSizeChange');
+      this.emit('AdSizeChange');
     }
 
     /**
@@ -322,7 +378,7 @@ var Linear = function () {
     key: 'pauseAd',
     value: function pauseAd() {
       this._videoSlot.pause();
-      _trigger2.default.call(this, 'AdPaused');
+      this.emit('AdPaused');
     }
 
     /**
@@ -334,7 +390,7 @@ var Linear = function () {
     key: 'resumeAd',
     value: function resumeAd() {
       this._videoSlot.play();
-      _trigger2.default.call(this, 'AdPlaying');
+      this.emit('AdPlaying');
     }
 
     /**
@@ -346,7 +402,7 @@ var Linear = function () {
     key: 'expandAd',
     value: function expandAd() {
       this.set('expanded', true);
-      _trigger2.default.call(this, 'AdExpandedChange');
+      this.emit('AdExpandedChange');
     }
 
     /**
@@ -358,7 +414,7 @@ var Linear = function () {
     key: 'collapseAd',
     value: function collapseAd() {
       this.set('expanded', false);
-      _trigger2.default.call(this, 'AdExpandedChange');
+      this.emit('AdExpandedChange');
     }
 
     /**
@@ -372,13 +428,7 @@ var Linear = function () {
   }, {
     key: 'subscribe',
     value: function subscribe(handler, event, context) {
-      if (!this._subscribers[event]) {
-        this._subscribers[event] = [];
-      }
-      this._subscribers[event].push({
-        callback: handler,
-        context: context
-      });
+      this.on(event, handler, context);
     }
 
     /**
@@ -391,11 +441,7 @@ var Linear = function () {
   }, {
     key: 'unsubscribe',
     value: function unsubscribe(handler, event) {
-      var eventSubscribers = this._subscribers[event];
-      if (!Array.isArray(eventSubscribers)) return;
-      this._subscribers[event] = eventSubscribers.filter(function (subscriber) {
-        return handler !== subscriber;
-      });
+      this.off(event, handler);
     }
 
     /**
@@ -536,16 +582,16 @@ var Linear = function () {
       }
       this.set('volume', volume);
       this._videoSlot.volume = volume;
-      _trigger2.default.call(this, 'AdVolumeChange');
+      this.emit('AdVolumeChange');
     }
   }]);
 
   return Linear;
-}();
+}(TinyEmitter);
 
 exports.default = Linear;
 
-},{"./handler/vast-ended":1,"./handler/vast-timeupdate":2,"./toggles":5,"./trigger":6,"./util/load-css":7}],5:[function(require,module,exports){
+},{"./handler/vast-ended":2,"./handler/vast-timeupdate":3,"./toggles":6,"tiny-emitter":1}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -555,13 +601,6 @@ exports.$toggleExpand = $toggleExpand;
 exports.$togglePlay = $togglePlay;
 exports.$toggleUI = $toggleUI;
 exports.$removeAll = $removeAll;
-
-var _trigger = require('./trigger');
-
-var _trigger2 = _interopRequireDefault(_trigger);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function $toggleExpand(toExpand) {
   $toggleUI.call(this, toExpand);
   $togglePlay.call(this, toExpand);
@@ -569,8 +608,8 @@ function $toggleExpand(toExpand) {
   this._attributes.expandAd = toExpand;
   this._attributes.remainingTime = toExpand ? -2 : -1;
 
-  _trigger2.default.call(this, 'AdExpandedChange');
-  _trigger2.default.call(this, 'AdDurationChange');
+  this.emit('AdExpandedChange');
+  this.emit('AdDurationChange');
 }
 
 function $togglePlay(toPlay) {
@@ -598,34 +637,4 @@ function $removeAll() {
   this._ui = null;
 }
 
-},{"./trigger":6}],6:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (event, msg) {
-  var subscribers = this._subscribers[event] || [];
-  subscribers.forEach(function (handlers) {
-    handlers.callback.apply(handlers.context, msg);
-  });
-};
-
-},{}],7:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (url) {
-  var link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = url;
-  // parent returns Window object
-  parent.document.body.appendChild(link);
-  return link;
-};
-
-},{}]},{},[3]);
+},{}]},{},[4]);

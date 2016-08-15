@@ -1,5 +1,3 @@
-import $trigger from '../trigger'
-
 function _normNumber (start, end, value) {
   return (value - start) / (end - start)
 }
@@ -19,7 +17,7 @@ export default function () {
 
   if (last.hook) last.hook()
 
-  $trigger.call(this, last.event)
+  this.emit(last.event)
 
   var quartile = this._quartileEvents
   this._lastQuartilePosition = quartile[ quartile.indexOf(last) + 1 ]

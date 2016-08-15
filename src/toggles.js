@@ -1,5 +1,3 @@
-import $trigger from './trigger'
-
 export function $toggleExpand (toExpand) {
   $toggleUI.call(this, toExpand)
   $togglePlay.call(this, toExpand)
@@ -7,8 +5,8 @@ export function $toggleExpand (toExpand) {
   this._attributes.expandAd = toExpand
   this._attributes.remainingTime = toExpand ? -2 : -1
 
-  $trigger.call(this, 'AdExpandedChange')
-  $trigger.call(this, 'AdDurationChange')
+  this.emit('AdExpandedChange')
+  this.emit('AdDurationChange')
 }
 
 export function $togglePlay (toPlay) {

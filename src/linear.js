@@ -1,6 +1,5 @@
-import loadCss from './util/load-css'
-import $trigger from './trigger'
-import {$removeAll} from './toggles'
+const TinyEmitter = require('tiny-emitter')
+import { $removeAll } from './toggles'
 import handleVastEnded from './handler/vast-ended'
 import handleVastTimeupdate from './handler/vast-timeupdate'
 
@@ -9,7 +8,7 @@ function $enableSkippable () {
 }
 
 function $throwError (msg) {
-  $trigger.call(this, 'AdError', msg)
+  this.emit('AdError', msg)
 }
 
 function $setVideoAd () {
@@ -49,13 +48,12 @@ function _setSupportedVideo (videoEl, videos) {
 //   return el
 // }
 
-export default class Linear {
+export default class Linear extends TinyEmitter {
 
   constructor () {
+    super()
     this._slot = null
     this._videoSlot = null
-
-    this._subscribers = {}
 
     this._attributes = {
       companions: '',
@@ -135,12 +133,12 @@ variables. Refer to the language specific API description for more details.
 
     this._slot = environmentVars.slot
     this._videoSlot = environmentVars.videoSlot
-    this._style = loadCss('ad.css')
+    // this._style = loadCss('ad.css')
     $setVideoAd.call(this)
     this._videoSlot.addEventListener('timeupdate', handleVastTimeupdate.bind(this), false)
     this._videoSlot.addEventListener('ended', handleVastEnded.bind(this), false)
 
-    $trigger.call(this, 'AdLoaded')
+    this.emit('AdLoaded')
   }
 
   /**
@@ -158,7 +156,7 @@ variables. Refer to the language specific API description for more details.
     // this._ui.buy.addEventListener('click', $onClickThru.bind(this), false)
     // this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false)
     // this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false)
-    $trigger.call(this, 'AdStarted')
+    this.emit('AdStarted')
   }
 
   /**
@@ -168,7 +166,7 @@ variables. Refer to the language specific API description for more details.
   stopAd () {
     if (this._destroyed) return
     $removeAll.call(this)
-    $trigger.call(this, 'AdStopped')
+    this.emit('AdStopped')
   }
 
   /**
@@ -179,8 +177,8 @@ variables. Refer to the language specific API description for more details.
     if (this._destroyed) return
     if (!this._attributes.skippableState) return
     $removeAll.call(this)
-    $trigger.call(this, 'AdSkipped')
-    $trigger.call(this, 'AdStopped')
+    this.emit('AdSkipped')
+    this.emit('AdStopped')
   }
 
   /**
@@ -194,7 +192,7 @@ variables. Refer to the language specific API description for more details.
     this._attributes.width = width
     this._attributes.height = height
     this._attributes.viewMode = viewMode
-    $trigger.call(this, 'AdSizeChange')
+    this.emit('AdSizeChange')
   }
 
   /**
@@ -203,7 +201,7 @@ variables. Refer to the language specific API description for more details.
    */
   pauseAd () {
     this._videoSlot.pause()
-    $trigger.call(this, 'AdPaused')
+    this.emit('AdPaused')
   }
 
   /**
@@ -212,7 +210,7 @@ variables. Refer to the language specific API description for more details.
    */
   resumeAd () {
     this._videoSlot.play()
-    $trigger.call(this, 'AdPlaying')
+    this.emit('AdPlaying')
   }
 
   /**
@@ -221,7 +219,7 @@ variables. Refer to the language specific API description for more details.
    */
   expandAd () {
     this.set('expanded', true)
-    $trigger.call(this, 'AdExpandedChange')
+    this.emit('AdExpandedChange')
   }
 
   /**
@@ -230,7 +228,7 @@ variables. Refer to the language specific API description for more details.
    */
   collapseAd () {
     this.set('expanded', false)
-    $trigger.call(this, 'AdExpandedChange')
+    this.emit('AdExpandedChange')
   }
 
   /**
@@ -241,13 +239,7 @@ variables. Refer to the language specific API description for more details.
    * @param {object} context
    */
   subscribe (handler, event, context) {
-    if (!this._subscribers[event]) {
-      this._subscribers[event] = []
-    }
-    this._subscribers[event].push({
-      callback: handler,
-      context: context
-    })
+    this.on(event, handler, context)
   }
 
   /**
@@ -257,9 +249,7 @@ variables. Refer to the language specific API description for more details.
    * @param {string} event
    */
   unsubscribe (handler, event) {
-    let eventSubscribers = this._subscribers[event]
-    if (!Array.isArray(eventSubscribers)) return
-    this._subscribers[event] = eventSubscribers.filter(subscriber => handler !== subscriber)
+    this.off(event, handler)
   }
 
   /**
@@ -367,6 +357,6 @@ variables. Refer to the language specific API description for more details.
     }
     this.set('volume', volume)
     this._videoSlot.volume = volume
-    $trigger.call(this, 'AdVolumeChange')
+    this.emit('AdVolumeChange')
   }
 }
