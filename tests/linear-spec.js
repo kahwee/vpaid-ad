@@ -81,25 +81,15 @@ describe('Linear', function () {
 
   describe('with videos', function () {
     let linear1
-    let linear2
     let videoSlot1
-    let videoSlot2
     let slot
 
     before(function () {
       slot = document.createElement('div')
       videoSlot1 = document.createElement('video')
-      videoSlot2 = document.createElement('video')
       document.body.appendChild(slot)
       document.body.appendChild(videoSlot1)
-      document.body.appendChild(videoSlot2)
       linear1 = new Linear({
-        videos: [{
-          url: '/base/tests/fixtures/xbox-one.mp4',
-          mimetype: 'video/mp4'
-        }]
-      })
-      linear2 = new Linear({
         videos: [{
           url: '/base/tests/fixtures/xbox-one.mp4',
           mimetype: 'video/mp4'
@@ -108,11 +98,9 @@ describe('Linear', function () {
     })
 
     after(function () {
-      // slot.remove()
-      // videoSlot1.remove()
-      // videoSlot2.remove()
-      // linear1 = null
-      // linear2 = null
+      slot.remove()
+      videoSlot1.remove()
+      linear1 = null
     })
 
     describe('initAd()', function () {
@@ -121,12 +109,15 @@ describe('Linear', function () {
           expect(linear1._videoSlot.src).to.match(/xbox-one.mp4$/)
           done()
         }, 'AdLoaded')
-        linear1.initAd(320, 160, 'normal', null, null, {slot, videoSlot: videoSlot1})
-        linear2.initAd(320, 160, 'normal', null, null, {slot, videoSlot: videoSlot2})
+        linear1.initAd(320, 160, 'normal', null, null, {
+          slot,
+          videoSlot: videoSlot1
+        })
       })
     })
 
-    describe('life cycle #1 (for staggering)', function () {
+    describe('life cycle', function () {
+      this.wait = 5000
       it('should startAd()', function (done) {
         linear1.subscribe(function () {
           done()
@@ -148,44 +139,19 @@ describe('Linear', function () {
         linear1.pauseAd()
       })
 
-      it('should emit AdVideoMidpoint when playing', function (done) {
-        linear1.subscribe(function () {
-          linear1._videoSlot.pause()
-          done()
-        }, 'AdVideoMidpoint')
-        linear1._videoSlot.play()
-      })
-
-      it('should emit AdVideoComplete when playing', function (done) {
+      it('should resumeAd()', function (done) {
         linear1.subscribe(function () {
           done()
-        }, 'AdVideoComplete')
-        linear1._videoSlot.play()
-      })
-    })
-
-
-    describe('life cycle #2 (for staggering)', function () {
-
-      it('should emit AdVideoFirstQuartile when playing', function (done) {
-        linear2.subscribe(function () {
-          done()
-        }, 'AdVideoFirstQuartile')
-        linear2._videoSlot.play()
-      })
-
-      it('should emit AdVideoThirdQuartile when playing', function (done) {
-        linear2.subscribe(function () {
-          done()
-        }, 'AdVideoThirdQuartile')
+        }, 'AdPlaying')
+        linear1.resumeAd()
       })
 
       it('should emit AdStopped when stopped', function (done) {
-        linear2.subscribe(function () {
-          expect(linear2._slot.textContent.trim()).to.be.empty
+        linear1.subscribe(function () {
+          expect(linear1._slot.textContent.trim()).to.be.empty
           done()
         }, 'AdStopped')
-        linear2.stopAd()
+        linear1.stopAd()
       })
     })
   })

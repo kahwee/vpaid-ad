@@ -24,25 +24,31 @@ export default class {
    * @param  {TinyEmitter} emitter [description]
    * @return {[type]}         [description]
    */
-  constructor (el, emitter) {
+  constructor (el, emitter, prefix = 'AdVideo') {
     this.el = el
     this.emitter = emitter
+    this.prefix = prefix
     this.quartileIndexEmitted = -1
     this.el.addEventListener('timeupdate', this.handleTimeupdate.bind(this))
     this.el.addEventListener('ended', this.handleEnded.bind(this))
+  }
+
+  emit(...rest) {
+    const eventName = this.prefix + rest[0]
+    return this.emitter.emit.apply(this.emitter, [eventName].concat(rest.splice(1)))
   }
 
   handleTimeupdate () {
     const upcomingQuartileIndex = this.quartileIndexEmitted + 1
     const upcomingQuartile = quartiles[upcomingQuartileIndex]
     if (upcomingQuartile && this.el.currentTime / this.el.duration > upcomingQuartile.value) {
-      this.emitter.emit(`AdVideo${upcomingQuartile.name}`)
+      this.emit(upcomingQuartile.name)
       this.quartileIndexEmitted = upcomingQuartileIndex
     }
   }
 
   handleEnded () {
-    this.emitter.emit(`AdVideo${vpaidLifeCycle[4]}`)
+    this.emit(vpaidLifeCycle[4])
     // Garbage collect event listeners
     this.el.removeEventListener('timeupdate', this.handleTimeupdate)
     this.el.removeEventListener('ended', this.handleEnded)
