@@ -10,6 +10,7 @@
     "browserify": "browserify src/index.js -o dist/vpaid-ad.js",
     "watchify": "watchify src/index.js -o dist/vpaid-ad.js",
     "build": "npm run lint && npm run babel && npm run browserify",
+    "test-ci": "CI=true && karma start",
     "test": "karma start"
   },
   "repository": {
@@ -37,9 +38,11 @@
     "karma-browserify": "^5.1.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^1.0.1",
+    "karma-cli": "^1.0.1",
     "karma-coverage": "^1.1.1",
     "karma-mocha": "^1.1.1",
     "karma-mocha-reporter": "^2.1.0",
+    "karma-phantomjs-launcher": "^1.0.1",
     "mocha": "^3.0.2",
     "standard": "^7.1.2",
     "watchify": "^3.7.0"

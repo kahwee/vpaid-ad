@@ -12,7 +12,7 @@ module.exports = function (config) {
 
   config.set({
     basePath: '.',
-    reporters: ['progress', 'coverage'],
+    reporters: ['mocha', 'coverage'],
     frameworks: ['browserify', 'mocha', 'chai'],
     browsers: browsers,
     preprocessors: preprocessors,
@@ -60,6 +60,9 @@ module.exports = function (config) {
           subdir: '.'
         }
       ]
+    },
+    mochaReporter: {
+      divider: ''
     },
     phantomjsLauncher: {
       // Have phantomjs exit if a ResourceError is encountered (useful if karma exits without killing phantom)

@@ -1,7 +1,6 @@
 const TinyEmitter = require('tiny-emitter')
 import { $removeAll } from './toggles'
-import handleVastEnded from './handler/vast-ended'
-import handleVastTimeupdate from './handler/vast-timeupdate'
+const VideoTracker = require('./video-tracker').default
 
 function $enableSkippable () {
   this._attributes.skippableState = true
@@ -49,6 +48,7 @@ export default class Linear extends TinyEmitter {
   constructor (options = {}) {
     super()
     this._ui = {}
+    this.quartileIndexEmitted = -1
 
     this._attributes = {
       companions: '',
@@ -69,17 +69,6 @@ export default class Linear extends TinyEmitter {
 
     // open interactive panel -> AdExpandedChange, AdInteraction
     // when close panel -> AdExpandedChange, AdInteraction
-
-    this._quartileEvents = [
-      {event: 'AdVideoStart', position: 0},
-      {event: 'AdVideoFirstQuartile', position: 25},
-      {event: 'AdVideoMidpoint', position: 50},
-      {event: 'AdSkippableStateChange', position: 65, hook: $enableSkippable.bind(this)},
-      {event: 'AdVideoThirdQuartile', position: 75},
-      {event: 'AdVideoComplete', position: 100}
-    ]
-
-    this._lastQuartilePosition = this._quartileEvents[0]
 
     this._options = options
     this._options.videos = this._options.videos || []
@@ -130,8 +119,9 @@ variables. Refer to the language specific API description for more details.
     this._slot = environmentVars.slot
     this._videoSlot = environmentVars.videoSlot
     $setVideoAd.call(this)
-    this._videoSlot.addEventListener('timeupdate', handleVastTimeupdate.bind(this), false)
-    this._videoSlot.addEventListener('ended', handleVastEnded.bind(this), false)
+    if (this._videoSlot) {
+      this.videoTracker = new VideoTracker(this._videoSlot, this)
+    }
     this.emit('AdLoaded')
   }
 
