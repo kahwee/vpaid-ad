@@ -108,11 +108,11 @@ describe('Linear', function () {
     })
 
     after(function () {
-      slot.remove()
-      videoSlot1.remove()
-      videoSlot2.remove()
-      linear1 = null
-      linear2 = null
+      // slot.remove()
+      // videoSlot1.remove()
+      // videoSlot2.remove()
+      // linear1 = null
+      // linear2 = null
     })
 
     describe('initAd()', function () {
