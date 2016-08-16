@@ -1,0 +1,23 @@
+[
+  "handshakeVersion",
+  "initAd",
+  "startAd",
+  "stopAd",
+  "skipAd",
+  "resizeAd",
+  "pauseAd",
+  "resumeAd",
+  "expandAd",
+  "collapseAd",
+  "getAdLinear",
+  "getAdWidth",
+  "getAdHeight",
+  "getAdExpanded",
+  "getAdSkippableState",
+  "getAdRemainingTime",
+  "getAdDuration",
+  "getAdVolume",
+  "getAdCompanions",
+  "getAdIcons",
+  "setAdVolume"
+]

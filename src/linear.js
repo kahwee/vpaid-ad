@@ -1,4 +1,5 @@
 const TinyEmitter = require('tiny-emitter')
+const vpaidMethods = require('./vpaid-methods.json')
 import { $removeAll } from './toggles'
 const VideoTracker = require('./video-tracker').default
 
@@ -14,7 +15,7 @@ function $setVideoAd () {
   }
   _setSize(videoSlot, [this._attributes.width, this._attributes.height])
 
-  if (!_setSupportedVideo(videoSlot, this._options.videos)) {
+  if (!setSupportedVideo(videoSlot, this._options.videos)) {
     return this.emit('AdError', 'no supported video found')
   }
 }
@@ -24,16 +25,6 @@ function _setSize (el, size) {
   el.setAttribute('height', size[1])
   el.style.width = size[0] + 'px'
   el.style.height = size[1] + 'px'
-}
-
-function _setSupportedVideo (videoEl, videos) {
-  var supportedVideos = videos.filter(video => videoEl.canPlayType(video.mimetype))
-
-  if (supportedVideos.length === 0) return false
-
-  videoEl.setAttribute('src', supportedVideos[0].url)
-
-  return true
 }
 
 // function _createAndAppend (parent, tagName, className) {
@@ -47,6 +38,7 @@ export default class Linear extends TinyEmitter {
 
   constructor (options = {}) {
     super()
+    this.emitVpaidMethodInvocations()
     this._ui = {}
     this.quartileIndexEmitted = -1
     this.hasEngaged = false
@@ -119,13 +111,72 @@ variables. Refer to the language specific API description for more details.
 
     this._slot = environmentVars.slot
     this._videoSlot = environmentVars.videoSlot
-    $setVideoAd.call(this)
-    if (this._videoSlot) {
-      this.videoTracker = new VideoTracker(this._videoSlot, this)
+    if (!this._videoSlot) {
+      return this.emit('AdError', 'Video slot is invalid')
     }
-    this.emit('AdLoaded')
+    if (!this._slot) {
+      return this.emit('AdError', 'Slot is invalid')
+    }
+    _setSize(this._videoSlot, [this._attributes.width, this._attributes.height])
+    this.setSupportedVideo(this._options.videos).then(() => {
+      this.emit('AdLoaded')
+    }).catch((reason) => {
+      this.emit('AdLog', reason)
+      this.emit('AdLoaded')
+    })
+    this.videoTracker = new VideoTracker(this._videoSlot, this)
   }
 
+  setVideoSource (src, type) {
+    return new Promise((resolve, reject) => {
+      this._videoSlot.onloadeddata = function () {
+        resolve()
+      }
+      this._videoSlot.onerror = function (ev) {
+        let msg
+        switch (ev.target.error.code) {
+          case ev.target.error.MEDIA_ERR_ABORTED:
+            msg = 'You aborted the video playback.'
+            break
+          case ev.target.error.MEDIA_ERR_NETWORK:
+            msg = 'A network error caused the video download to fail part-way.'
+            break
+          case ev.target.error.MEDIA_ERR_DECODE:
+            msg = 'The video playback was aborted due to a corruption problem or because the video used features your browser did not support.'
+            break
+          case ev.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            msg = 'The video could not be loaded, either because the server or network failed or because the format is not supported.'
+            break
+          default:
+            msg = 'An unknown error occurred.'
+            break
+        }
+        reject(`${msg} Type: ${type}, source: ${src}`)
+      }
+      this._videoSlot.setAttribute('src', src)
+      this._videoSlot.setAttribute('type', type)
+    })
+  }
+
+  getSupportedVideos (videos) {
+    const el = document.createElement('video')
+    return videos.filter(video => el.canPlayType(video.type))
+  }
+
+  setSupportedVideo (videos) {
+    return new Promise((resolve, reject) => {
+      const supportedVideos = this.getSupportedVideos(videos)
+      if (supportedVideos[0]) {
+        this.setVideoSource(supportedVideos[0].url, supportedVideos[0].type).then(() => {
+          resolve()
+        }).catch((reason) => {
+          reject(reason)
+        })
+      } else {
+        reject('no supported video found')
+      }
+    })
+  }
   /**
    * startAd
    *
@@ -196,6 +247,7 @@ variables. Refer to the language specific API description for more details.
    *
    */
   expandAd () {
+    this.hasEngaged = true
     this.set('expanded', true)
     this.emit('AdExpandedChange')
   }
@@ -344,5 +396,15 @@ variables. Refer to the language specific API description for more details.
     this.set('volume', volume)
     this._videoSlot.volume = volume
     this.emit('AdVolumeChange')
+  }
+
+  emitVpaidMethodInvocations () {
+    vpaidMethods.forEach((name) => {
+      const originalReference = this[name]
+      this[name] = (...rest) => {
+        this.emit(`${name}()`, ...rest)
+        return originalReference.apply(this, rest)
+      }
+    }, this)
   }
 }

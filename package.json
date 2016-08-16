@@ -75,15 +75,19 @@
     ]
   },
   "keywords": [
-    "vpaid",
     "ad",
+    "ads",
     "adtech",
-    "vast",
-    "debugging",
     "advertisement",
+    "advertising",
+    "debugging",
+    "flash",
+    "iab",
+    "ima",
     "unit",
     "vast",
-    "advertising"
+    "vast",
+    "vpaid"
   ],
   "dependencies": {
     "tiny-emitter": "^1.1.0"

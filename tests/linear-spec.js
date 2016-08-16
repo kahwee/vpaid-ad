@@ -1,6 +1,37 @@
 import Linear from '../src/linear'
 
 describe('Linear', function () {
+  describe('initializing with no videoSlot or slot', function () {
+    let linear
+    let slot
+    let videoSlot
+
+    before(function () {
+      slot = document.createElement('div')
+      videoSlot = document.createElement('video')
+    })
+
+    after(function () {
+      slot = videoSlot = null
+    })
+
+    it('should emit AdError when videoSlot is not found', function (done) {
+      linear = new Linear()
+      linear.subscribe((reason) => {
+        done()
+      }, 'AdError')
+      linear.initAd(320, 160, 'normal', null, null, {slot})
+    })
+
+    it('should emit AdError when slot is not found', function (done) {
+      linear = new Linear()
+      linear.subscribe((reason) => {
+        done()
+      }, 'AdError')
+      linear.initAd(320, 160, 'normal', null, null, {videoSlot})
+    })
+  })
+
   describe('with no videos', function () {
     let linear
     let videoSlot
@@ -37,15 +68,24 @@ describe('Linear', function () {
       })
     })
 
+    describe('emitVpaidMethodInvocations', function () {
+      it('should emit getAdWidth() when it is called', function (done) {
+        linear.on('getAdWidth()', function () {
+          done()
+          linear.off('getAdWidth()')
+        })
+        linear.getAdWidth()
+      })
+    })
+
     describe('ad size', function () {
       it('should report the correct width', function (done) {
         expect(linear.getAdWidth()).to.equal(320)
         done()
       })
 
-      it('should report the correct height', function (done) {
+      it('should report the correct height', function () {
         expect(linear.getAdHeight()).to.equal(160)
-        done()
       })
 
       it('should resizeAd with correct parameters', function (done) {
@@ -98,8 +138,8 @@ describe('Linear', function () {
       document.body.appendChild(videoSlot1)
       linear1 = new Linear({
         videos: [{
-          url: '/base/tests/fixtures/xbox-one.mp4',
-          mimetype: 'video/mp4'
+          url: '/base/tests/fixtures/apple-watch.mp4',
+          type: 'video/mp4'
         }]
       })
     })
@@ -139,14 +179,14 @@ describe('Linear', function () {
         linear1._videoSlot.play()
       })
 
-      it('should return valid AdDuration', function() {
+      it('should return valid AdDuration', function () {
         linear1.hasEngaged = false
         expect(linear1.getAdDuration()).to.be.above(0)
         linear1.hasEngaged = true
         expect(linear1.getAdDuration()).to.be.equal(-2)
       })
 
-      it('should return valid AdRemainingTime', function() {
+      it('should return valid AdRemainingTime', function () {
         linear1.hasEngaged = false
         expect(linear1.getAdRemainingTime()).to.be.above(0)
         linear1.hasEngaged = true
