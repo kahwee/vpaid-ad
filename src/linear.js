@@ -4,8 +4,8 @@ import { $removeAll } from './toggles'
 const VideoTracker = require('./video-tracker').default
 
 function _setSize (el, size) {
-  el.setAttribute('width', size[0])
-  el.setAttribute('height', size[1])
+  el.width = size[0]
+  el.height = size[1]
   el.style.width = size[0] + 'px'
   el.style.height = size[1] + 'px'
 }
@@ -130,8 +130,8 @@ variables. Refer to the language specific API description for more details.
         }
         reject(`${msg} Type: ${type}, source: ${src}`)
       }
-      this._videoSlot.setAttribute('src', src)
-      this._videoSlot.setAttribute('type', type)
+      this._videoSlot.src = src
+      this._videoSlot.type = type
     })
   }
 
