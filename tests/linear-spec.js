@@ -138,7 +138,7 @@ describe('Linear', function () {
       document.body.appendChild(videoSlot1)
       linear1 = new Linear({
         videos: [{
-          url: '/base/tests/fixtures/apple-watch.mp4',
+          url: '/base/tests/fixtures/xbox-one.mp4',
           type: 'video/mp4'
         }]
       })
