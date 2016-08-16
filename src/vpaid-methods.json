@@ -13,7 +13,7 @@
   "getAdWidth",
   "getAdHeight",
   "getAdExpanded",
-  "getAdSkippableState",
+  "getAdadSkippableState",
   "getAdRemainingTime",
   "getAdDuration",
   "getAdVolume",

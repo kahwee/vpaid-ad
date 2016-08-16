@@ -67,6 +67,7 @@
       "lib/**"
     ],
     "globals": [
+      "after",
       "parent",
       "describe",
       "it",

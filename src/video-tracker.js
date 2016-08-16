@@ -33,7 +33,7 @@ export default class {
     this.el.addEventListener('ended', this.handleEnded.bind(this))
   }
 
-  emit(...rest) {
+  emit (...rest) {
     const eventName = this.prefix + rest[0]
     return this.emitter.emit.apply(this.emitter, [eventName].concat(rest.splice(1)))
   }

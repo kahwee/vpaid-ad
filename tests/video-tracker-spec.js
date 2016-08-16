@@ -6,8 +6,8 @@ describe('VideoTracker', function () {
     this.timeout(10000)
     let videoSlot1
     let videoSlot2
-    let tracker1
-    let tracker2
+    let tracker1 // eslint-disable-line no-unused-vars
+    let tracker2 // eslint-disable-line no-unused-vars
     let emitter1
     let emitter2
 
@@ -28,6 +28,7 @@ describe('VideoTracker', function () {
       videoSlot1.remove()
       videoSlot2.remove()
       emitter1 = emitter2 = null
+      tracker1 = tracker2 = null
     })
 
     describe('life cycle #1 (for staggering)', function () {

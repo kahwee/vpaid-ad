@@ -69,54 +69,6 @@ module.exports = E;
 },{}],2:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function () {
-  if (this._destroyed) return;
-
-  _toggles.$removeAll.call(this);
-  this.emit('AdStopped');
-};
-
-var _toggles = require('../toggles');
-
-},{"../toggles":6}],3:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function () {
-  if (this._destroyed) return;
-
-  var videoSlot = this._videoSlot;
-  var percentPlayed = _mapNumber(0, videoSlot.duration, 0, 100, videoSlot.currentTime);
-  var last = this._lastQuartilePosition;
-
-  if (percentPlayed < last.position) return;
-
-  if (last.hook) last.hook();
-
-  this.emit(last.event);
-
-  var quartile = this._quartileEvents;
-  this._lastQuartilePosition = quartile[quartile.indexOf(last) + 1];
-};
-
-function _normNumber(start, end, value) {
-  return (value - start) / (end - start);
-}
-
-function _mapNumber(fromStart, fromEnd, toStart, toEnd, value) {
-  return toStart + (toEnd - toStart) * _normNumber(fromStart, fromEnd, value);
-}
-
-},{}],4:[function(require,module,exports){
-'use strict';
-
 var _linear = require('./linear');
 
 var _linear2 = _interopRequireDefault(_linear);
@@ -127,7 +79,7 @@ window.getVPAIDAd = function () {
   return new _linear2.default();
 };
 
-},{"./linear":5}],5:[function(require,module,exports){
+},{"./linear":3}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -138,16 +90,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _toggles = require('./toggles');
 
-var _vastEnded = require('./handler/vast-ended');
-
-var _vastEnded2 = _interopRequireDefault(_vastEnded);
-
-var _vastTimeupdate = require('./handler/vast-timeupdate');
-
-var _vastTimeupdate2 = _interopRequireDefault(_vastTimeupdate);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -155,28 +97,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var TinyEmitter = require('tiny-emitter');
+var vpaidMethods = require('./vpaid-methods.json');
 
-
-function $enableSkippable() {
-  this._attributes.skippableState = true;
-}
-
-function $throwError(msg) {
-  this.emit('AdError', msg);
-}
-
-function $setVideoAd() {
-  var videoSlot = this._videoSlot;
-
-  if (!videoSlot) {
-    return $throwError.call(this, 'no video');
-  }
-  _setSize(videoSlot, [this._attributes.width, this._attributes.height]);
-
-  if (!_setSupportedVideo(videoSlot, this._parameters.videos || [])) {
-    return $throwError.call(this, 'no supported video found');
-  }
-}
+var VideoTracker = require('./video-tracker').default;
 
 function _setSize(el, size) {
   el.setAttribute('width', size[0]);
@@ -185,35 +108,20 @@ function _setSize(el, size) {
   el.style.height = size[1] + 'px';
 }
 
-function _setSupportedVideo(videoEl, videos) {
-  var supportedVideos = videos.filter(function (video) {
-    return videoEl.canPlayType(video.mimetype);
-  });
-
-  if (supportedVideos.length === 0) return false;
-
-  videoEl.setAttribute('src', supportedVideos[0].url);
-
-  return true;
-}
-
-// function _createAndAppend (parent, tagName, className) {
-//   var el = document.createElement(tagName || 'div')
-//   el.className = className || ''
-//   parent.appendChild(el)
-//   return el
-// }
-
 var Linear = function (_TinyEmitter) {
   _inherits(Linear, _TinyEmitter);
 
   function Linear() {
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
     _classCallCheck(this, Linear);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Linear).call(this));
 
-    _this._slot = null;
-    _this._videoSlot = null;
+    _this.emitVpaidMethodInvocations();
+    _this._ui = {};
+    _this.quartileIndexEmitted = -1;
+    _this.hasEngaged = false;
 
     _this._attributes = {
       companions: '',
@@ -223,7 +131,7 @@ var Linear = function (_TinyEmitter) {
       expanded: false,
       icons: false,
       linear: true,
-      skippableState: false,
+      adSkippableState: false,
       viewMode: 'normal',
       width: 0,
       height: 0,
@@ -235,11 +143,8 @@ var Linear = function (_TinyEmitter) {
     // open interactive panel -> AdExpandedChange, AdInteraction
     // when close panel -> AdExpandedChange, AdInteraction
 
-    _this._quartileEvents = [{ event: 'AdVideoStart', position: 0 }, { event: 'AdVideoFirstQuartile', position: 25 }, { event: 'AdVideoMidpoint', position: 50 }, { event: 'AdSkippableStateChange', position: 65, hook: $enableSkippable.bind(_this) }, { event: 'AdVideoThirdQuartile', position: 75 }, { event: 'AdVideoComplete', position: 100 }];
-
-    _this._lastQuartilePosition = _this._quartileEvents[0];
-
-    _this._parameters = {};
+    _this._options = options;
+    _this._options.videos = _this._options.videos || [];
     return _this;
   }
 
@@ -288,6 +193,8 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'initAd',
     value: function initAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars) {
+      var _this2 = this;
+
       this._attributes.width = width;
       this._attributes.height = height;
       this._attributes.viewMode = viewMode;
@@ -295,43 +202,111 @@ var Linear = function (_TinyEmitter) {
 
       this._slot = environmentVars.slot;
       this._videoSlot = environmentVars.videoSlot;
-      // this._style = loadCss('ad.css')
-      $setVideoAd.call(this);
-      this._videoSlot.addEventListener('timeupdate', _vastTimeupdate2.default.bind(this), false);
-      this._videoSlot.addEventListener('ended', _vastEnded2.default.bind(this), false);
+      if (!this._videoSlot) {
+        return this.emit('AdError', 'Video slot is invalid');
+      }
+      if (!this._slot) {
+        return this.emit('AdError', 'Slot is invalid');
+      }
+      _setSize(this._videoSlot, [this._attributes.width, this._attributes.height]);
+      this.setSupportedVideo(this._options.videos).then(function () {
+        _this2.emit('AdLoaded');
+      }).catch(function (reason) {
+        _this2.emit('AdLog', reason);
+        _this2.emit('AdLoaded');
+      });
+      this.videoTracker = new VideoTracker(this._videoSlot, this);
+    }
+  }, {
+    key: 'setVideoSource',
+    value: function setVideoSource(src, type) {
+      var _this3 = this;
 
-      this.emit('AdLoaded');
+      return new Promise(function (resolve, reject) {
+        _this3._videoSlot.onloadeddata = function () {
+          resolve();
+        };
+        _this3._videoSlot.onerror = function (ev) {
+          var msg = void 0;
+          /* istanbul ignore next */
+          switch (ev.target.error.code) {
+            case ev.target.error.MEDIA_ERR_ABORTED:
+              msg = 'You aborted the video playback.';
+              break;
+            case ev.target.error.MEDIA_ERR_NETWORK:
+              msg = 'A network error caused the video download to fail part-way.';
+              break;
+            case ev.target.error.MEDIA_ERR_DECODE:
+              msg = 'The video playback was aborted due to a corruption problem or because the video used features your browser did not support.';
+              break;
+            case ev.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              msg = 'The video could not be loaded, either because the server or network failed or because the format is not supported.';
+              break;
+            default:
+              msg = 'An unknown error occurred.';
+              break;
+          }
+          reject(msg + ' Type: ' + type + ', source: ' + src);
+        };
+        _this3._videoSlot.setAttribute('src', src);
+        _this3._videoSlot.setAttribute('type', type);
+      });
+    }
+  }, {
+    key: 'getSupportedVideos',
+    value: function getSupportedVideos(videos) {
+      var el = document.createElement('video');
+      return videos.filter(function (video) {
+        return el.canPlayType(video.type);
+      });
+    }
+  }, {
+    key: 'setSupportedVideo',
+    value: function setSupportedVideo(videos) {
+      var _this4 = this;
+
+      return new Promise(function (resolve, reject) {
+        var supportedVideos = _this4.getSupportedVideos(videos);
+        if (supportedVideos[0]) {
+          _this4.setVideoSource(supportedVideos[0].url, supportedVideos[0].type).then(function () {
+            resolve();
+          }).catch(function (reason) {
+            reject(reason);
+          });
+        } else {
+          reject('no supported video found');
+        }
+      });
     }
 
     /**
-     * startAd
-     *
+     * startAd() is called by the video player when the video player is ready for the ad to
+     * display. The ad unit responds by sending an AdStarted event that notifies the video player
+     * when the ad unit has started playing. Once started, the video player cannot restart the ad unit
+     * by calling startAd() and stopAd() multiple times.
      */
 
   }, {
     key: 'startAd',
     value: function startAd() {
-      this._videoSlot.play();
-      this._ui = {};
-      // this._ui.buy = _createAndAppend(this._slot, 'div', 'vpaidAdLinear')
-      // this._ui.banner = _createAndAppend(this._slot, 'div', 'banner')
-      // this._ui.xBtn = _createAndAppend(this._slot, 'button', 'close')
-      // this._ui.interact = _createAndAppend(this._slot, 'div', 'interact')
+      var _this5 = this;
 
-      // this._ui.buy.addEventListener('click', $onClickThru.bind(this), false)
-      // this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false)
-      // this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false)
-      this.emit('AdStarted');
+      this._videoSlot.addEventListener('loadeddata', function () {
+        _this5.emit('AdStarted');
+      }, false);
+      this._videoSlot.load();
     }
 
     /**
-     * stopAd
-     *
+     * The video player calls stopAd() when it will no longer display the ad or needs to cancel
+     * the ad unit. The ad unit responds by closing the ad, cleaning up its resources and then sending
+     * the AdStopped event. The process for stopping an ad may take time.
      */
 
   }, {
     key: 'stopAd',
     value: function stopAd() {
+      /* istanbul ignore if */
       if (this._destroyed) return;
       _toggles.$removeAll.call(this);
       this.emit('AdStopped');
@@ -345,15 +320,24 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'skipAd',
     value: function skipAd() {
+      /* istanbul ignore if */
       if (this._destroyed) return;
-      if (!this._attributes.skippableState) return;
+      if (!this._attributes.adSkippableState) {
+        return false;
+      }
       _toggles.$removeAll.call(this);
       this.emit('AdSkipped');
       this.emit('AdStopped');
     }
 
     /**
-     * [resizeAd description]
+     * The resizeAd() method is only called when the video player changes the width and
+     * height of the video content container, which prompts the ad unit to scale or reposition. The ad
+     * unit then resizes itself to a width and height that is equal to or less than the width and height
+     * supplied by the video player. Once resized, the ad unit writes updated dimensions to the
+     * adWidth and adHeight properties and sends the AdSizeChange event to confirm that
+     * it has resized itself.
+     *
      * @param  {number} width    The maximum display area allotted for the ad. The ad unit must resize itself to a width and height that is within the values provided. The video player must always provide width and height unless it is in fullscreen mode. In fullscreen mode, the ad unit can ignore width/height parameters and resize to any dimension.
      * @param  {number} height   The maximum display area allotted for the ad. The ad unit must resize itself to a width and height that is within the values provided. The video player must always provide width and height unless it is in fullscreen mode. In fullscreen mode, the ad unit can ignore width/height parameters and resize to any dimension.
      * @param  {string} viewMode Can be one of “normal” “thumbnail” or “fullscreen” to indicate the mode to which the video player is resizing. Width and height are not required when viewmode is fullscreen.
@@ -401,6 +385,7 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'expandAd',
     value: function expandAd() {
+      this.hasEngaged = true;
       this.set('expanded', true);
       this.emit('AdExpandedChange');
     }
@@ -493,15 +478,15 @@ var Linear = function (_TinyEmitter) {
     }
 
     /**
-     * getAdSkippableState - if the ad is in the position to be able to skip
+     * getAdadSkippableState - if the ad is in the position to be able to skip
      *
      * @return {boolean}
      */
 
   }, {
-    key: 'getAdSkippableState',
-    value: function getAdSkippableState() {
-      return this._attributes.skippableState;
+    key: 'getAdadSkippableState',
+    value: function getAdadSkippableState() {
+      return this._attributes.adSkippableState;
     }
 
     /**
@@ -513,7 +498,11 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'getAdRemainingTime',
     value: function getAdRemainingTime() {
-      return this._attributes.remainingTime;
+      if (this.hasEngaged) {
+        return -2;
+      } else {
+        return this._videoSlot.duration - this._videoSlot.currentTime;
+      }
     }
 
     /**
@@ -525,7 +514,11 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'getAdDuration',
     value: function getAdDuration() {
-      return this._attributes.duration;
+      if (this.hasEngaged) {
+        return -2;
+      } else {
+        return this._videoSlot.duration;
+      }
     }
 
     /**
@@ -578,11 +571,28 @@ var Linear = function (_TinyEmitter) {
         return;
       }
       if (volume < 0 || volume > 1) {
-        return $throwError('volume is not valid');
+        return this.emit('AdError', 'volume is not valid');
       }
       this.set('volume', volume);
       this._videoSlot.volume = volume;
       this.emit('AdVolumeChange');
+    }
+  }, {
+    key: 'emitVpaidMethodInvocations',
+    value: function emitVpaidMethodInvocations() {
+      var _this6 = this;
+
+      vpaidMethods.forEach(function (name) {
+        var originalReference = _this6[name];
+        _this6[name] = function () {
+          for (var _len = arguments.length, rest = Array(_len), _key = 0; _key < _len; _key++) {
+            rest[_key] = arguments[_key];
+          }
+
+          _this6.emit.apply(_this6, [name + '()'].concat(rest));
+          return originalReference.apply(_this6, rest);
+        };
+      }, this);
     }
   }]);
 
@@ -591,7 +601,7 @@ var Linear = function (_TinyEmitter) {
 
 exports.default = Linear;
 
-},{"./handler/vast-ended":2,"./handler/vast-timeupdate":3,"./toggles":6,"tiny-emitter":1}],6:[function(require,module,exports){
+},{"./toggles":4,"./video-tracker":5,"./vpaid-methods.json":7,"tiny-emitter":1}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -632,9 +642,128 @@ function $toggleUI(show) {
 function $removeAll() {
   this._destroyed = true;
   this._videoSlot.src = '';
-  this._style.parentElement.removeChild(this._style);
   this._slot.innerHTML = '';
   this._ui = null;
 }
 
-},{}]},{},[4]);
+},{}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _vpaidLifeCycle = require('./vpaid-life-cycle');
+
+var _vpaidLifeCycle2 = _interopRequireDefault(_vpaidLifeCycle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var quartiles = [{
+  value: 0,
+  name: _vpaidLifeCycle2.default[0]
+}, {
+  value: 0.25,
+  name: _vpaidLifeCycle2.default[1]
+}, {
+  value: 0.50,
+  name: _vpaidLifeCycle2.default[2]
+}, {
+  value: 0.75,
+  name: _vpaidLifeCycle2.default[3]
+}];
+
+var _class = function () {
+  /**
+   * [constructor description]
+   * @param  {[type]} el      [description]
+   * @param  {TinyEmitter} emitter [description]
+   * @return {[type]}         [description]
+   */
+  function _class(el, emitter) {
+    var prefix = arguments.length <= 2 || arguments[2] === undefined ? 'AdVideo' : arguments[2];
+
+    _classCallCheck(this, _class);
+
+    this.el = el;
+    this.emitter = emitter;
+    this.prefix = prefix;
+    this.quartileIndexEmitted = -1;
+    this.el.addEventListener('timeupdate', this.handleTimeupdate.bind(this));
+    this.el.addEventListener('ended', this.handleEnded.bind(this));
+  }
+
+  _createClass(_class, [{
+    key: 'emit',
+    value: function emit() {
+      for (var _len = arguments.length, rest = Array(_len), _key = 0; _key < _len; _key++) {
+        rest[_key] = arguments[_key];
+      }
+
+      var eventName = this.prefix + rest[0];
+      return this.emitter.emit.apply(this.emitter, [eventName].concat(rest.splice(1)));
+    }
+  }, {
+    key: 'handleTimeupdate',
+    value: function handleTimeupdate() {
+      var upcomingQuartileIndex = this.quartileIndexEmitted + 1;
+      var upcomingQuartile = quartiles[upcomingQuartileIndex];
+      if (upcomingQuartile && this.el.currentTime / this.el.duration > upcomingQuartile.value) {
+        this.emit(upcomingQuartile.name);
+        this.quartileIndexEmitted = upcomingQuartileIndex;
+      }
+    }
+  }, {
+    key: 'handleEnded',
+    value: function handleEnded() {
+      this.emit(_vpaidLifeCycle2.default[4]);
+      // Garbage collect event listeners
+      this.el.removeEventListener('timeupdate', this.handleTimeupdate);
+      this.el.removeEventListener('ended', this.handleEnded);
+    }
+  }]);
+
+  return _class;
+}();
+
+exports.default = _class;
+
+},{"./vpaid-life-cycle":6}],6:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var vpaidLifeCycle = ['Start', 'FirstQuartile', 'Midpoint', 'ThirdQuartile', 'Complete'];
+exports.default = vpaidLifeCycle;
+
+},{}],7:[function(require,module,exports){
+module.exports=[
+  "handshakeVersion",
+  "initAd",
+  "startAd",
+  "stopAd",
+  "skipAd",
+  "resizeAd",
+  "pauseAd",
+  "resumeAd",
+  "expandAd",
+  "collapseAd",
+  "getAdLinear",
+  "getAdWidth",
+  "getAdHeight",
+  "getAdExpanded",
+  "getAdadSkippableState",
+  "getAdRemainingTime",
+  "getAdDuration",
+  "getAdVolume",
+  "getAdCompanions",
+  "getAdIcons",
+  "setAdVolume"
+]
+
+},{}]},{},[2]);

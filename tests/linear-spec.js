@@ -68,6 +68,26 @@ describe('Linear', function () {
       })
     })
 
+    describe('expandAd() and collapseAd()', function () {
+      it('should emit AdExpandedChange after expandAd()', function (done) {
+        linear.once('AdExpandedChange', function () {
+          expect(linear.hasEngaged).to.be.true
+          expect(linear.getAdExpanded()).to.be.true
+          done()
+        })
+        linear.expandAd()
+      })
+
+      it('should emit AdExpandedChange after collapseAd()', function (done) {
+        linear.once('AdExpandedChange', function () {
+          expect(linear.hasEngaged).to.be.true
+          expect(linear.getAdExpanded()).to.be.false
+          done()
+        })
+        linear.collapseAd()
+      })
+    })
+
     describe('emitVpaidMethodInvocations', function () {
       it('should emit getAdWidth() when it is called', function (done) {
         linear.on('getAdWidth()', function () {
@@ -75,6 +95,24 @@ describe('Linear', function () {
           linear.off('getAdWidth()')
         })
         linear.getAdWidth()
+      })
+    })
+
+    describe('subscribe() and unsubscribe()', function () {
+      it('should emit getAdWidth() when it is called', function (done) {
+        let handler = function () {
+          linear.unsubscribe(handler, 'Hello')
+          console.log('hi')
+          done()
+        }
+        linear.subscribe(handler, 'Hello')
+        linear.emit('Hello')
+      })
+
+      it('should not cause the previous done() to be called multiple times', function (done) {
+        // This is to prove the previous `unsubscribe` did work
+        linear.emit('Hello')
+        done()
       })
     })
 
@@ -93,6 +131,7 @@ describe('Linear', function () {
           expect(linear.getAdWidth()).to.equal(640)
           expect(linear.getAdHeight()).to.equal(320)
           done()
+          linear.off('AdSizeChange')
         }, 'AdSizeChange')
         linear.resizeAd(640, 320, 'thumbnail')
       })
@@ -120,8 +159,30 @@ describe('Linear', function () {
       it('should emit AdError is set with invalid volume', function (done) {
         linear.subscribe(function () {
           done()
+          linear.off('AdError')
         }, 'AdError')
         linear.setAdVolume(1.5)
+      })
+    })
+
+    describe('skipAd()', function () {
+      it('should not allow skipAd() when adSkippableState is false', function (done) {
+        linear._attributes.adSkippableState = false
+        expect(linear.skipAd()).to.be.false
+        done()
+      })
+
+      it('should emit AdSkipped when adSkippableState is true', function (done) {
+        linear._attributes.adSkippableState = true
+        Promise.all([
+          new Promise((resolve) => {
+            linear.once('AdSkipped', () => resolve())
+          }),
+          new Promise((resolve) => {
+            linear.once('AdStopped', () => resolve())
+          })
+        ]).then(() => done())
+        linear.skipAd()
       })
     })
   })
@@ -164,7 +225,7 @@ describe('Linear', function () {
     })
 
     describe('life cycle', function () {
-      this.wait = 5000
+      this.timeout(5000)
       it('should startAd()', function (done) {
         linear1.subscribe(function () {
           done()
@@ -194,24 +255,24 @@ describe('Linear', function () {
       })
 
       it('should pauseAd()', function (done) {
-        linear1.subscribe(function () {
+        linear1.once('AdPaused', function () {
           done()
-        }, 'AdPaused')
+        })
         linear1.pauseAd()
       })
 
       it('should resumeAd()', function (done) {
-        linear1.subscribe(function () {
+        linear1.once('AdPlaying', function () {
           done()
-        }, 'AdPlaying')
+        })
         linear1.resumeAd()
       })
 
       it('should emit AdStopped when stopped', function (done) {
-        linear1.subscribe(function () {
+        linear1.once('AdStopped', function () {
           expect(linear1._slot.textContent.trim()).to.be.empty
           done()
-        }, 'AdStopped')
+        })
         linear1.stopAd()
       })
     })

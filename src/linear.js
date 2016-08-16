@@ -3,36 +3,12 @@ const vpaidMethods = require('./vpaid-methods.json')
 import { $removeAll } from './toggles'
 const VideoTracker = require('./video-tracker').default
 
-function $enableSkippable () {
-  this._attributes.skippableState = true
-}
-
-function $setVideoAd () {
-  var videoSlot = this._videoSlot
-
-  if (!videoSlot) {
-    return this.emit('AdError', 'no video')
-  }
-  _setSize(videoSlot, [this._attributes.width, this._attributes.height])
-
-  if (!setSupportedVideo(videoSlot, this._options.videos)) {
-    return this.emit('AdError', 'no supported video found')
-  }
-}
-
 function _setSize (el, size) {
   el.setAttribute('width', size[0])
   el.setAttribute('height', size[1])
   el.style.width = size[0] + 'px'
   el.style.height = size[1] + 'px'
 }
-
-// function _createAndAppend (parent, tagName, className) {
-//   var el = document.createElement(tagName || 'div')
-//   el.className = className || ''
-//   parent.appendChild(el)
-//   return el
-// }
 
 export default class Linear extends TinyEmitter {
 
@@ -51,7 +27,7 @@ export default class Linear extends TinyEmitter {
       expanded: false,
       icons: false,
       linear: true,
-      skippableState: false,
+      adSkippableState: false,
       viewMode: 'normal',
       width: 0,
       height: 0,
@@ -134,6 +110,7 @@ variables. Refer to the language specific API description for more details.
       }
       this._videoSlot.onerror = function (ev) {
         let msg
+        /* istanbul ignore next */
         switch (ev.target.error.code) {
           case ev.target.error.MEDIA_ERR_ABORTED:
             msg = 'You aborted the video playback.'
@@ -177,9 +154,12 @@ variables. Refer to the language specific API description for more details.
       }
     })
   }
+
   /**
-   * startAd
-   *
+   * startAd() is called by the video player when the video player is ready for the ad to
+   * display. The ad unit responds by sending an AdStarted event that notifies the video player
+   * when the ad unit has started playing. Once started, the video player cannot restart the ad unit
+   * by calling startAd() and stopAd() multiple times.
    */
   startAd () {
     this._videoSlot.addEventListener('loadeddata', () => {
@@ -189,10 +169,12 @@ variables. Refer to the language specific API description for more details.
   }
 
   /**
-   * stopAd
-   *
+   * The video player calls stopAd() when it will no longer display the ad or needs to cancel
+   * the ad unit. The ad unit responds by closing the ad, cleaning up its resources and then sending
+   * the AdStopped event. The process for stopping an ad may take time.
    */
   stopAd () {
+    /* istanbul ignore if */
     if (this._destroyed) return
     $removeAll.call(this)
     this.emit('AdStopped')
@@ -203,15 +185,24 @@ variables. Refer to the language specific API description for more details.
    *
    */
   skipAd () {
+    /* istanbul ignore if */
     if (this._destroyed) return
-    if (!this._attributes.skippableState) return
+    if (!this._attributes.adSkippableState) {
+      return false
+    }
     $removeAll.call(this)
     this.emit('AdSkipped')
     this.emit('AdStopped')
   }
 
   /**
-   * [resizeAd description]
+   * The resizeAd() method is only called when the video player changes the width and
+   * height of the video content container, which prompts the ad unit to scale or reposition. The ad
+   * unit then resizes itself to a width and height that is equal to or less than the width and height
+   * supplied by the video player. Once resized, the ad unit writes updated dimensions to the
+   * adWidth and adHeight properties and sends the AdSizeChange event to confirm that
+   * it has resized itself.
+   *
    * @param  {number} width    The maximum display area allotted for the ad. The ad unit must resize itself to a width and height that is within the values provided. The video player must always provide width and height unless it is in fullscreen mode. In fullscreen mode, the ad unit can ignore width/height parameters and resize to any dimension.
    * @param  {number} height   The maximum display area allotted for the ad. The ad unit must resize itself to a width and height that is within the values provided. The video player must always provide width and height unless it is in fullscreen mode. In fullscreen mode, the ad unit can ignore width/height parameters and resize to any dimension.
    * @param  {string} viewMode Can be one of “normal” “thumbnail” or “fullscreen” to indicate the mode to which the video player is resizing. Width and height are not required when viewmode is fullscreen.
@@ -319,12 +310,12 @@ variables. Refer to the language specific API description for more details.
   }
 
   /**
-   * getAdSkippableState - if the ad is in the position to be able to skip
+   * getAdadSkippableState - if the ad is in the position to be able to skip
    *
    * @return {boolean}
    */
-  getAdSkippableState () {
-    return this._attributes.skippableState
+  getAdadSkippableState () {
+    return this._attributes.adSkippableState
   }
 
   /**
