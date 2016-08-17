@@ -7,7 +7,7 @@ function _setSize (el, size) {
   el.width = size[0]
   el.height = size[1]
   // Just in case .style is not defined. This does happen in cases
-  // where video players pass in mock DOM objects.
+  // where video players pass in mock DOM objects. Like Google IMA
   if (el.style) {
     el.style.width = size[0] + 'px'
     el.style.height = size[1] + 'px'
@@ -109,8 +109,16 @@ variables. Refer to the language specific API description for more details.
 
   setVideoSource (src, type) {
     return new Promise((resolve, reject) => {
-      this._videoSlot.onloadeddata = function () {
+      // As Google is not using an actual DOM video, it doesn't implement
+      // `onloadeddata`. In normal cases, `onloadeddata` is `null` when no
+      // handler function is assigned to it. However in Google's case, it
+      // returns as undefined.
+      if (typeof this._videoSlot.onloadeddata === 'undefined') {
         resolve()
+      } else {
+        this._videoSlot.onloadeddata = function () {
+          resolve()
+        }
       }
       this._videoSlot.onerror = function (ev) {
         let msg
@@ -166,9 +174,18 @@ variables. Refer to the language specific API description for more details.
    * by calling startAd() and stopAd() multiple times.
    */
   startAd () {
-    this._videoSlot.addEventListener('loadeddata', () => {
+    // As Google is not using an actual DOM video, it doesn't implement
+    // `onloadeddata`. In normal cases, `onloadeddata` is `null` when no
+    // handler function is assigned to it. However in Google's case, it
+    // returns as undefined.
+    if (typeof this._videoSlot.onloadeddata === 'undefined') {
       this.emit('AdStarted')
-    }, false)
+    } else {
+      // Ideally we want to wait till the first frame is present
+      this._videoSlot.onloadeddata = () => {
+        this.emit('AdStarted')
+      }
+    }
     this._videoSlot.load()
   }
 

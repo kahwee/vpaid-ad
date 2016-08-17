@@ -105,7 +105,7 @@ function _setSize(el, size) {
   el.width = size[0];
   el.height = size[1];
   // Just in case .style is not defined. This does happen in cases
-  // where video players pass in mock DOM objects.
+  // where video players pass in mock DOM objects. Like Google IMA
   if (el.style) {
     el.style.width = size[0] + 'px';
     el.style.height = size[1] + 'px';
@@ -227,9 +227,17 @@ var Linear = function (_TinyEmitter) {
       var _this3 = this;
 
       return new Promise(function (resolve, reject) {
-        _this3._videoSlot.onloadeddata = function () {
+        // As Google is not using an actual DOM video, it doesn't implement
+        // `onloadeddata`. In normal cases, `onloadeddata` is `null` when no
+        // handler function is assigned to it. However in Google's case, it
+        // returns as undefined.
+        if (typeof _this3._videoSlot.onloadeddata === 'undefined') {
           resolve();
-        };
+        } else {
+          _this3._videoSlot.onloadeddata = function () {
+            resolve();
+          };
+        }
         _this3._videoSlot.onerror = function (ev) {
           var msg = void 0;
           /* istanbul ignore next */
@@ -295,9 +303,18 @@ var Linear = function (_TinyEmitter) {
     value: function startAd() {
       var _this5 = this;
 
-      this._videoSlot.addEventListener('loadeddata', function () {
-        _this5.emit('AdStarted');
-      }, false);
+      // As Google is not using an actual DOM video, it doesn't implement
+      // `onloadeddata`. In normal cases, `onloadeddata` is `null` when no
+      // handler function is assigned to it. However in Google's case, it
+      // returns as undefined.
+      if (typeof this._videoSlot.onloadeddata === 'undefined') {
+        this.emit('AdStarted');
+      } else {
+        // Ideally we want to wait till the first frame is present
+        this._videoSlot.onloadeddata = function () {
+          _this5.emit('AdStarted');
+        };
+      }
       this._videoSlot.load();
     }
 
