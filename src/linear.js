@@ -6,8 +6,12 @@ const VideoTracker = require('./video-tracker').default
 function _setSize (el, size) {
   el.width = size[0]
   el.height = size[1]
-  el.style.width = size[0] + 'px'
-  el.style.height = size[1] + 'px'
+  // Just in case .style is not defined. This does happen in cases
+  // where video players pass in mock DOM objects.
+  if (el.style) {
+    el.style.width = size[0] + 'px'
+    el.style.height = size[1] + 'px'
+  }
 }
 
 export default class Linear extends TinyEmitter {
