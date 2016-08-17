@@ -522,6 +522,18 @@ var Linear = function (_TinyEmitter) {
     }
 
     /**
+     * in support of skippable ads, this feature enables the video
+     * player to identify when the ad is in a state where it can be skipped
+     * @return {[type]} [description]
+     */
+
+  }, {
+    key: 'getAdSkippableState',
+    value: function getAdSkippableState() {
+      return this._attributes.adSkippableState;
+    }
+
+    /**
      * getAdVolume
      *
      * @return {number} between 0 and 1, if is not implemented will return -1
