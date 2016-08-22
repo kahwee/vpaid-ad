@@ -1,3 +1,6 @@
+# v2.0.5 -- 2016-08-22
+* Don't include presets so rollup can work when this is an external dependency.
+
 # v2.0.0 -- 2016-08-14
 * Use tiny-emitter instead
 

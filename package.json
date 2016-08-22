@@ -1,12 +1,12 @@
 {
   "name": "vpaid-ad",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "VPAID ad class for extending purposes.",
   "main": "lib/index.js",
   "scripts": {
     "coverage-ci": "codecov && rm -rf ./coverage",
     "lint": "standard",
-    "babel": "./node_modules/.bin/babel -d lib src",
+    "babel": "./node_modules/.bin/babel -d lib --presets es2015 src",
     "browserify": "browserify src/index.js -o dist/vpaid-ad.js",
     "watchify": "watchify src/index.js -o dist/vpaid-ad.js",
     "build": "npm run lint && npm run babel && npm run browserify",
@@ -43,7 +43,7 @@
     "karma-mocha": "^1.1.1",
     "karma-mocha-reporter": "^2.1.0",
     "mocha": "^3.0.2",
-    "standard": "^7.1.2",
+    "standard": "^8.0.0-beta.5",
     "watchify": "^3.7.0"
   },
   "browserify": {
