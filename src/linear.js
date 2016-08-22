@@ -1,7 +1,13 @@
-import TinyEmitter from 'tiny-emitter'
-import vpaidMethods from './vpaid-methods.json'
-import { $removeAll } from './toggles'
-import VideoTracker from './video-tracker'
+const TinyEmitter = require('tiny-emitter')
+const vpaidMethods = require('./vpaid-methods.json')
+const VideoTracker = require('./video-tracker')
+
+function $removeAll () {
+  this._destroyed = true
+  this._videoSlot.src = ''
+  this._slot.innerHTML = ''
+  this._ui = null
+}
 
 function _setSize (el, size) {
   el.width = size[0]
@@ -14,7 +20,7 @@ function _setSize (el, size) {
   }
 }
 
-export default class Linear extends TinyEmitter {
+module.exports = class Linear extends TinyEmitter {
 
   constructor (options = {}) {
     super()

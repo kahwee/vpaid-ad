@@ -1,4 +1,4 @@
-import Linear from '../src/linear'
+const Linear = require('../src/linear')
 
 describe('Linear', function () {
   describe('initializing with no videoSlot or slot', function () {

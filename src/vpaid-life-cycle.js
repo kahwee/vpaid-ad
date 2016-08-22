@@ -1,8 +1,7 @@
-const vpaidLifeCycle = [
+module.exports = [
   'Start',
   'FirstQuartile',
   'Midpoint',
   'ThirdQuartile',
   'Complete'
 ]
-export default vpaidLifeCycle

@@ -1,4 +1,4 @@
-const VideoTracker = require('../src/video-tracker').default
+const VideoTracker = require('../src/video-tracker')
 const TinyEmitter = require('tiny-emitter')
 
 describe('VideoTracker', function () {

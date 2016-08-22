@@ -1,4 +1,4 @@
-import vpaidLifeCycle from './vpaid-life-cycle'
+const vpaidLifeCycle = require('./vpaid-life-cycle')
 const quartiles = [
   {
     value: 0,
@@ -17,7 +17,7 @@ const quartiles = [
     name: vpaidLifeCycle[3]
   }
 ]
-export default class {
+module.exports = class {
   /**
    * [constructor description]
    * @param  {[type]} el      [description]

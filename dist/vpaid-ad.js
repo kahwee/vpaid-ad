@@ -69,46 +69,33 @@ module.exports = E;
 },{}],2:[function(require,module,exports){
 'use strict';
 
-var _linear = require('./linear');
-
-var _linear2 = _interopRequireDefault(_linear);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var Linear = require('./linear');
 
 window.getVPAIDAd = function () {
-  return new _linear2.default();
+  return new Linear();
 };
 
 },{"./linear":3}],3:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _tinyEmitter = require('tiny-emitter');
-
-var _tinyEmitter2 = _interopRequireDefault(_tinyEmitter);
-
-var _vpaidMethods = require('./vpaid-methods.json');
-
-var _vpaidMethods2 = _interopRequireDefault(_vpaidMethods);
-
-var _toggles = require('./toggles');
-
-var _videoTracker = require('./video-tracker');
-
-var _videoTracker2 = _interopRequireDefault(_videoTracker);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TinyEmitter = require('tiny-emitter');
+var vpaidMethods = require('./vpaid-methods.json');
+var VideoTracker = require('./video-tracker');
+
+function $removeAll() {
+  this._destroyed = true;
+  this._videoSlot.src = '';
+  this._slot.innerHTML = '';
+  this._ui = null;
+}
 
 function _setSize(el, size) {
   el.width = size[0];
@@ -121,7 +108,7 @@ function _setSize(el, size) {
   }
 }
 
-var Linear = function (_TinyEmitter) {
+module.exports = function (_TinyEmitter) {
   _inherits(Linear, _TinyEmitter);
 
   function Linear() {
@@ -228,7 +215,7 @@ var Linear = function (_TinyEmitter) {
         _this2.emit('AdLog', reason);
         _this2.emit('AdLoaded');
       });
-      this.videoTracker = new _videoTracker2.default(this._videoSlot, this);
+      this.videoTracker = new VideoTracker(this._videoSlot, this);
     }
   }, {
     key: 'setVideoSource',
@@ -338,7 +325,7 @@ var Linear = function (_TinyEmitter) {
     value: function stopAd() {
       /* istanbul ignore if */
       if (this._destroyed) return;
-      _toggles.$removeAll.call(this);
+      $removeAll.call(this);
       this.emit('AdStopped');
     }
 
@@ -355,7 +342,7 @@ var Linear = function (_TinyEmitter) {
       if (!this._attributes.adSkippableState) {
         return false;
       }
-      _toggles.$removeAll.call(this);
+      $removeAll.call(this);
       this.emit('AdSkipped');
       this.emit('AdStopped');
     }
@@ -624,7 +611,7 @@ var Linear = function (_TinyEmitter) {
     value: function emitVpaidMethodInvocations() {
       var _this6 = this;
 
-      _vpaidMethods2.default.forEach(function (name) {
+      vpaidMethods.forEach(function (name) {
         var originalReference = _this6[name];
         _this6[name] = function () {
           for (var _len = arguments.length, rest = Array(_len), _key = 0; _key < _len; _key++) {
@@ -639,87 +626,30 @@ var Linear = function (_TinyEmitter) {
   }]);
 
   return Linear;
-}(_tinyEmitter2.default);
+}(TinyEmitter);
 
-exports.default = Linear;
-
-},{"./toggles":4,"./video-tracker":5,"./vpaid-methods.json":7,"tiny-emitter":1}],4:[function(require,module,exports){
+},{"./video-tracker":4,"./vpaid-methods.json":6,"tiny-emitter":1}],4:[function(require,module,exports){
 'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.$toggleExpand = $toggleExpand;
-exports.$togglePlay = $togglePlay;
-exports.$toggleUI = $toggleUI;
-exports.$removeAll = $removeAll;
-function $toggleExpand(toExpand) {
-  $toggleUI.call(this, toExpand);
-  $togglePlay.call(this, toExpand);
-
-  this._attributes.expandAd = toExpand;
-  this._attributes.remainingTime = toExpand ? -2 : -1;
-
-  this.emit('AdExpandedChange');
-  this.emit('AdDurationChange');
-}
-
-function $togglePlay(toPlay) {
-  if (toPlay) {
-    this._videoSlot.pause();
-  } else {
-    this._videoSlot.play();
-  }
-}
-
-function $toggleUI(show) {
-  this._ui.interact.style.display = getDisplay();
-  this._ui.xBtn.style.display = getDisplay();
-
-  function getDisplay() {
-    return show ? 'block' : 'none';
-  }
-}
-
-function $removeAll() {
-  this._destroyed = true;
-  this._videoSlot.src = '';
-  this._slot.innerHTML = '';
-  this._ui = null;
-}
-
-},{}],5:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _vpaidLifeCycle = require('./vpaid-life-cycle');
-
-var _vpaidLifeCycle2 = _interopRequireDefault(_vpaidLifeCycle);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var vpaidLifeCycle = require('./vpaid-life-cycle');
 var quartiles = [{
   value: 0,
-  name: _vpaidLifeCycle2.default[0]
+  name: vpaidLifeCycle[0]
 }, {
   value: 0.25,
-  name: _vpaidLifeCycle2.default[1]
+  name: vpaidLifeCycle[1]
 }, {
   value: 0.50,
-  name: _vpaidLifeCycle2.default[2]
+  name: vpaidLifeCycle[2]
 }, {
   value: 0.75,
-  name: _vpaidLifeCycle2.default[3]
+  name: vpaidLifeCycle[3]
 }];
-
-var _class = function () {
+module.exports = function () {
   /**
    * [constructor description]
    * @param  {[type]} el      [description]
@@ -762,7 +692,7 @@ var _class = function () {
   }, {
     key: 'handleEnded',
     value: function handleEnded() {
-      this.emit(_vpaidLifeCycle2.default[4]);
+      this.emit(vpaidLifeCycle[4]);
       // Garbage collect event listeners
       this.el.removeEventListener('timeupdate', this.handleTimeupdate);
       this.el.removeEventListener('ended', this.handleEnded);
@@ -772,18 +702,12 @@ var _class = function () {
   return _class;
 }();
 
-exports.default = _class;
-
-},{"./vpaid-life-cycle":6}],6:[function(require,module,exports){
+},{"./vpaid-life-cycle":5}],5:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var vpaidLifeCycle = ['Start', 'FirstQuartile', 'Midpoint', 'ThirdQuartile', 'Complete'];
-exports.default = vpaidLifeCycle;
+module.exports = ['Start', 'FirstQuartile', 'Midpoint', 'ThirdQuartile', 'Complete'];
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports=[
   "handshakeVersion",
   "initAd",
