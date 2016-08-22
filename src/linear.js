@@ -1,7 +1,7 @@
-const TinyEmitter = require('tiny-emitter')
-const vpaidMethods = require('./vpaid-methods.json')
+import TinyEmitter from 'tiny-emitter'
+import vpaidMethods from './vpaid-methods.json'
 import { $removeAll } from './toggles'
-const VideoTracker = require('./video-tracker').default
+import VideoTracker from './video-tracker'
 
 function _setSize (el, size) {
   el.width = size[0]
