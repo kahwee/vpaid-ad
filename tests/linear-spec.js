@@ -32,6 +32,33 @@ describe('Linear', function () {
     })
   })
 
+  describe('misc functions', function () {
+    let linear
+    let videoSlot
+    let slot
+
+    before(function () {
+      slot = document.createElement('div')
+      videoSlot = document.createElement('video')
+      document.body.appendChild(slot)
+      document.body.appendChild(videoSlot)
+      linear = new Linear()
+    })
+
+    after(function () {
+      slot.remove()
+      videoSlot.remove()
+      linear = null
+    })
+
+    describe('appendStylesheet()', function () {
+      it('should have added style.css', function () {
+        linear.appendStylesheet('/base/tests/fixtures/style.css')
+        expect(document.querySelector('link[href*="style.css"]')).to.be.defined
+      })
+    })
+  })
+
   describe('with no videos', function () {
     let linear
     let videoSlot
@@ -52,8 +79,8 @@ describe('Linear', function () {
     })
 
     describe('constructor()', function () {
-      it('should be initialized with the right options', function () {
-        expect(linear._options.videos).to.be.length(0)
+      it('should be initialized with the right opts', function () {
+        expect(linear.opts.videos).to.be.length(0)
       })
     })
 

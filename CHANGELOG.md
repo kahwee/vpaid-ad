@@ -1,3 +1,8 @@
+# v2.1.0 -- 2016-09-26
+
+* `this._options` renamed to `this.opts`
+* Added `appendStylesheet`
+
 # v2.0.5 -- 2016-08-22
 * Don't include presets so rollup can work when this is an external dependency.
 

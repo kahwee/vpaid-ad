@@ -1,5 +1,5 @@
 export default function () {
-  const clickThru = this._options.clickThru || {
+  const clickThru = this.opts.clickThru || {
     url: 'http://www.example.com',
     trackID: 123,
     playerHandles: false

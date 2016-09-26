@@ -29,6 +29,12 @@ module.exports = function (config) {
         included: false,
         served: true,
         watched: false
+      },
+      {
+        pattern: 'tests/fixtures/style.css',
+        included: false,
+        served: true,
+        watched: false
       }
     ],
     browserify: {

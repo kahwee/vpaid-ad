@@ -20,10 +20,11 @@ function _setSize (el, size) {
   }
 }
 
-module.exports = class Linear extends TinyEmitter {
+class Linear extends TinyEmitter {
 
-  constructor (options = {}) {
+  constructor (opts = {}) {
     super()
+    this.baseUrl = ''
     this.emitVpaidMethodInvocations()
     this._ui = {}
     this.quartileIndexEmitted = -1
@@ -49,8 +50,8 @@ module.exports = class Linear extends TinyEmitter {
     // open interactive panel -> AdExpandedChange, AdInteraction
     // when close panel -> AdExpandedChange, AdInteraction
 
-    this._options = options
-    this._options.videos = this._options.videos || []
+    this.opts = opts
+    this.opts.videos = this.opts.videos || []
   }
 
   set (attribute, newValue) {
@@ -69,6 +70,16 @@ module.exports = class Linear extends TinyEmitter {
    */
   handshakeVersion (playerVPAIDVersion) {
     return '2.0'
+  }
+
+  appendStylesheet (path) {
+    const head = document.getElementsByTagName('head')[0]
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.type = 'text/css'
+    link.href = this.baseUrl + path
+    link.media = 'all'
+    head.appendChild(link)
   }
 
   /**
@@ -104,7 +115,7 @@ variables. Refer to the language specific API description for more details.
       return this.emit('AdError', 'Slot is invalid')
     }
     _setSize(this._videoSlot, [this._attributes.width, this._attributes.height])
-    this.setSupportedVideo(this._options.videos).then(() => {
+    this.setSupportedVideo(this.opts.videos).then(() => {
       this.emit('AdLoaded')
     }).catch((reason) => {
       this.emit('AdLog', reason)
@@ -310,7 +321,7 @@ variables. Refer to the language specific API description for more details.
   }
 
   /**
-   * getAdWidth
+   * added to provide current width of ad unit after ad has resized
    *
    * @return {number} pixel's size of the ad, is equal to or less than the values passed in resizeAd/initAd
    */
@@ -319,7 +330,7 @@ variables. Refer to the language specific API description for more details.
   }
 
   /**
-   * getAdHeight
+   * added to provide current height of ad unit after ad has resized
    *
    * @return {number} pixel's size of the ad, is equal to or less than the values passed in resizeAd/initAd
    */
@@ -337,11 +348,12 @@ variables. Refer to the language specific API description for more details.
   }
 
   /**
-   * getAdadSkippableState - if the ad is in the position to be able to skip
+   * in support of skippable ads, this feature enables the video
+   * player to identify when the ad is in a state where it can be skipped
    *
    * @return {boolean}
    */
-  getAdadSkippableState () {
+  getAdSkippableState () {
     return this._attributes.adSkippableState
   }
 
@@ -359,7 +371,9 @@ variables. Refer to the language specific API description for more details.
   }
 
   /**
-   * getAdDuration
+   * reports total duration to more clearly report on the changing
+   * duration, which is confusing when both remaining time and duration can
+   * change
    *
    * @return {number} seconds, if not implemented will return -1, or -2 if the time is unknown (user is engaged with the ad)
    */
@@ -369,15 +383,6 @@ variables. Refer to the language specific API description for more details.
     } else {
       return this._videoSlot.duration
     }
-  }
-
-  /**
-   * in support of skippable ads, this feature enables the video
-   * player to identify when the ad is in a state where it can be skipped
-   * @return {[type]} [description]
-   */
-  getAdSkippableState () {
-    return this._attributes.adSkippableState
   }
 
   /**
@@ -399,7 +404,8 @@ variables. Refer to the language specific API description for more details.
   }
 
   /**
-   * getAdIcons
+   * included to support various industry programs which require the
+   * overlay of icons on the ad.
    *
    * @return {boolean} if true videoplayer may hide is own icons to not duplicate
    */
@@ -435,3 +441,4 @@ variables. Refer to the language specific API description for more details.
     }, this)
   }
 }
+module.exports = Linear
