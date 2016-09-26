@@ -655,27 +655,41 @@ var quartiles = [{
   value: 0.75,
   name: vpaidLifeCycle[3]
 }];
-module.exports = function () {
+function handleTimeupdate() {
+  var upcomingQuartileIndex = this.quartileIndexEmitted + 1;
+  var upcomingQuartile = quartiles[upcomingQuartileIndex];
+  if (upcomingQuartile && this.el.currentTime / this.el.duration > upcomingQuartile.value) {
+    this.emit(upcomingQuartile.name);
+    this.quartileIndexEmitted = upcomingQuartileIndex;
+  }
+}
+
+function handleEnded() {
+  this.emit(vpaidLifeCycle[4]);
+  // Garbage collect event listeners
+  this.removeEventListeners();
+}
+
+var VideoTracker = function () {
   /**
    * [constructor description]
    * @param  {[type]} el      [description]
    * @param  {TinyEmitter} emitter [description]
    * @return {[type]}         [description]
    */
-  function _class(el, emitter) {
+  function VideoTracker(el, emitter) {
     var prefix = arguments.length <= 2 || arguments[2] === undefined ? 'AdVideo' : arguments[2];
 
-    _classCallCheck(this, _class);
+    _classCallCheck(this, VideoTracker);
 
     this.el = el;
     this.emitter = emitter;
     this.prefix = prefix;
     this.quartileIndexEmitted = -1;
-    this.el.addEventListener('timeupdate', this.handleTimeupdate.bind(this));
-    this.el.addEventListener('ended', this.handleEnded.bind(this));
+    this.addEventListeners();
   }
 
-  _createClass(_class, [{
+  _createClass(VideoTracker, [{
     key: 'emit',
     value: function emit() {
       for (var _len = arguments.length, rest = Array(_len), _key = 0; _key < _len; _key++) {
@@ -686,27 +700,23 @@ module.exports = function () {
       return this.emitter.emit.apply(this.emitter, [eventName].concat(rest.splice(1)));
     }
   }, {
-    key: 'handleTimeupdate',
-    value: function handleTimeupdate() {
-      var upcomingQuartileIndex = this.quartileIndexEmitted + 1;
-      var upcomingQuartile = quartiles[upcomingQuartileIndex];
-      if (upcomingQuartile && this.el.currentTime / this.el.duration > upcomingQuartile.value) {
-        this.emit(upcomingQuartile.name);
-        this.quartileIndexEmitted = upcomingQuartileIndex;
-      }
+    key: 'addEventListeners',
+    value: function addEventListeners() {
+      this.el.addEventListener('timeupdate', handleTimeupdate.bind(this));
+      this.el.addEventListener('ended', handleEnded.bind(this));
     }
   }, {
-    key: 'handleEnded',
-    value: function handleEnded() {
-      this.emit(vpaidLifeCycle[4]);
-      // Garbage collect event listeners
-      this.el.removeEventListener('timeupdate', this.handleTimeupdate);
-      this.el.removeEventListener('ended', this.handleEnded);
+    key: 'removeEventListeners',
+    value: function removeEventListeners() {
+      this.el.removeEventListener('timeupdate', handleTimeupdate);
+      this.el.removeEventListener('ended', handleEnded);
     }
   }]);
 
-  return _class;
+  return VideoTracker;
 }();
+
+module.exports = VideoTracker;
 
 },{"./vpaid-life-cycle":5}],5:[function(require,module,exports){
 'use strict';
