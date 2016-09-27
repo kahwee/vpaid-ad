@@ -1,3 +1,8 @@
+# v2.1.2 -- 2016-09-26
+
+* Cleanup & refactor
+* Reworked on video selection
+
 # v2.1.0 -- 2016-09-26
 
 * `this._options` renamed to `this.opts`

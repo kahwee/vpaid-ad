@@ -89,23 +89,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var TinyEmitter = require('tiny-emitter');
 var vpaidMethods = require('./vpaid-methods.json');
 var VideoTracker = require('./video-tracker');
+var isSupported = require('./util/is-supported');
 
 function $removeAll() {
   this._destroyed = true;
   this._videoSlot.src = '';
   this._slot.innerHTML = '';
   this._ui = null;
-}
-
-function _setSize(el, size) {
-  el.width = size[0];
-  el.height = size[1];
-  // Just in case .style is not defined. This does happen in cases
-  // where video players pass in mock DOM objects. Like Google IMA
-  if (el.style) {
-    el.style.width = size[0] + 'px';
-    el.style.height = size[1] + 'px';
-  }
 }
 
 var Linear = function (_TinyEmitter) {
@@ -212,16 +202,10 @@ var Linear = function (_TinyEmitter) {
       this._attributes.viewMode = viewMode;
       this._attributes.desiredBitrate = desiredBitrate;
 
-      this._slot = environmentVars.slot;
-      this._videoSlot = environmentVars.videoSlot;
-      if (!this._videoSlot) {
-        return this.emit('AdError', 'Video slot is invalid');
-      }
-      if (!this._slot) {
-        return this.emit('AdError', 'Slot is invalid');
-      }
-      _setSize(this._videoSlot, [this._attributes.width, this._attributes.height]);
-      this.setSupportedVideo(this.opts.videos).then(function () {
+      this._slot = environmentVars.slot || this.emit('AdError', 'Video slot is invalid');
+      this._videoSlot = environmentVars.videoSlot || this.emit('AdError', 'Slot is invalid');
+      this.setSize(this._videoSlot, [this._attributes.width, this._attributes.height]);
+      this.useBestVideo().then(function () {
         _this2.emit('AdLoaded');
       }).catch(function (reason) {
         _this2.emit('AdLog', reason);
@@ -230,23 +214,37 @@ var Linear = function (_TinyEmitter) {
       this.videoTracker = new VideoTracker(this._videoSlot, this);
     }
   }, {
+    key: 'useBestVideo',
+    value: function useBestVideo() {
+      var _this3 = this;
+
+      return new Promise(function (resolve, reject) {
+        var bestVideo = _this3.opts.videos.filter(function (video) {
+          return isSupported(video.type);
+        });
+        if (bestVideo[0]) {
+          _this3.setVideoSource(bestVideo[0].url, bestVideo[0].type).then(resolve).catch(reject);
+        } else {
+          reject('no supported video found');
+        }
+      });
+    }
+  }, {
     key: 'setVideoSource',
     value: function setVideoSource(src, type) {
-      var _this3 = this;
+      var _this4 = this;
 
       return new Promise(function (resolve, reject) {
         // As Google is not using an actual DOM video, it doesn't implement
         // `onloadeddata`. In normal cases, `onloadeddata` is `null` when no
         // handler function is assigned to it. However in Google's case, it
         // returns as undefined.
-        if (typeof _this3._videoSlot.onloadeddata === 'undefined') {
+        if (typeof _this4._videoSlot.onloadeddata === 'undefined') {
           resolve();
         } else {
-          _this3._videoSlot.onloadeddata = function () {
-            resolve();
-          };
+          _this4._videoSlot.onloadeddata = resolve;
         }
-        _this3._videoSlot.onerror = function (ev) {
+        _this4._videoSlot.onerror = function (ev) {
           var msg = void 0;
           /* istanbul ignore next */
           switch (ev.target.error.code) {
@@ -268,34 +266,8 @@ var Linear = function (_TinyEmitter) {
           }
           reject(msg + ' Type: ' + type + ', source: ' + src);
         };
-        _this3._videoSlot.src = src;
-        _this3._videoSlot.type = type;
-      });
-    }
-  }, {
-    key: 'getSupportedVideos',
-    value: function getSupportedVideos(videos) {
-      var el = document.createElement('video');
-      return videos.filter(function (video) {
-        return el.canPlayType(video.type);
-      });
-    }
-  }, {
-    key: 'setSupportedVideo',
-    value: function setSupportedVideo(videos) {
-      var _this4 = this;
-
-      return new Promise(function (resolve, reject) {
-        var supportedVideos = _this4.getSupportedVideos(videos);
-        if (supportedVideos[0]) {
-          _this4.setVideoSource(supportedVideos[0].url, supportedVideos[0].type).then(function () {
-            resolve();
-          }).catch(function (reason) {
-            reject(reason);
-          });
-        } else {
-          reject('no supported video found');
-        }
+        _this4._videoSlot.src = src;
+        _this4._videoSlot.type = type;
       });
     }
 
@@ -432,30 +404,31 @@ var Linear = function (_TinyEmitter) {
     }
 
     /**
-     * subscribe
+     * The video player calls this method to register a listener to a particular event
      *
-     * @param {function} handler
-     * @param {string} event
-     * @param {object} context
+     * @param  {Function} fn            fn is a reference to the function that needs to be called when the specified event occurs
+     * @param  {string}   event         event is the name of the event that the video player is subscribing to
+     * @param  {[type]}   listenerScope [optional] listenerScope is a reference to the object in which the function is
+    defined
      */
 
   }, {
     key: 'subscribe',
-    value: function subscribe(handler, event, context) {
-      this.on(event, handler, context);
+    value: function subscribe(fn, event, listenerScope) {
+      this.on(event, fn, listenerScope);
     }
 
     /**
-     * unsubscribe
+     * The video player calls this method to remove a listener for a particular event
      *
-     * @param {function} handler
-     * @param {string} event
+     * @param  {Function} fn    the event listener that is being removed
+     * @param  {string}   event event is the name of the event that the video player is unsubscribing from
      */
 
   }, {
     key: 'unsubscribe',
-    value: function unsubscribe(handler, event) {
-      this.off(event, handler);
+    value: function unsubscribe(fn, event) {
+      this.off(event, fn);
     }
 
     /**
@@ -528,11 +501,7 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'getAdRemainingTime',
     value: function getAdRemainingTime() {
-      if (this.hasEngaged) {
-        return -2;
-      } else {
-        return this._videoSlot.duration - this._videoSlot.currentTime;
-      }
+      return this.hasEngaged ? -2 : this._videoSlot.duration - this._videoSlot.currentTime;
     }
 
     /**
@@ -546,11 +515,7 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'getAdDuration',
     value: function getAdDuration() {
-      if (this.hasEngaged) {
-        return -2;
-      } else {
-        return this._videoSlot.duration;
-      }
+      return this.hasEngaged ? -2 : this._videoSlot.duration;
     }
 
     /**
@@ -632,9 +597,35 @@ var Linear = function (_TinyEmitter) {
   return Linear;
 }(TinyEmitter);
 
+Linear.prototype.setSize = require('./util/set-size');
 module.exports = Linear;
 
-},{"./video-tracker":4,"./vpaid-methods.json":6,"tiny-emitter":1}],4:[function(require,module,exports){
+},{"./util/is-supported":4,"./util/set-size":5,"./video-tracker":6,"./vpaid-methods.json":8,"tiny-emitter":1}],4:[function(require,module,exports){
+'use strict';
+
+var el = void 0;
+module.exports = function (type) {
+  if (!el) {
+    el = document.createElement('video');
+  }
+  return !!el.canPlayType(type).replace(/no/, '');
+};
+
+},{}],5:[function(require,module,exports){
+'use strict';
+
+module.exports = function (el, size) {
+  el.width = size[0];
+  el.height = size[1];
+  // Just in case .style is not defined. This does happen in cases
+  // where video players pass in mock DOM objects. Like Google IMA
+  if (el.style) {
+    el.style.width = size[0] + 'px';
+    el.style.height = size[1] + 'px';
+  }
+};
+
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -718,12 +709,12 @@ var VideoTracker = function () {
 
 module.exports = VideoTracker;
 
-},{"./vpaid-life-cycle":5}],5:[function(require,module,exports){
+},{"./vpaid-life-cycle":7}],7:[function(require,module,exports){
 'use strict';
 
 module.exports = ['Start', 'FirstQuartile', 'Midpoint', 'ThirdQuartile', 'Complete'];
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports=[
   "handshakeVersion",
   "initAd",

@@ -1,23 +1,13 @@
 const TinyEmitter = require('tiny-emitter')
 const vpaidMethods = require('./vpaid-methods.json')
 const VideoTracker = require('./video-tracker')
+const isSupported = require('./util/is-supported')
 
 function $removeAll () {
   this._destroyed = true
   this._videoSlot.src = ''
   this._slot.innerHTML = ''
   this._ui = null
-}
-
-function _setSize (el, size) {
-  el.width = size[0]
-  el.height = size[1]
-  // Just in case .style is not defined. This does happen in cases
-  // where video players pass in mock DOM objects. Like Google IMA
-  if (el.style) {
-    el.style.width = size[0] + 'px'
-    el.style.height = size[1] + 'px'
-  }
 }
 
 class Linear extends TinyEmitter {
@@ -106,22 +96,28 @@ variables. Refer to the language specific API description for more details.
     this._attributes.viewMode = viewMode
     this._attributes.desiredBitrate = desiredBitrate
 
-    this._slot = environmentVars.slot
-    this._videoSlot = environmentVars.videoSlot
-    if (!this._videoSlot) {
-      return this.emit('AdError', 'Video slot is invalid')
-    }
-    if (!this._slot) {
-      return this.emit('AdError', 'Slot is invalid')
-    }
-    _setSize(this._videoSlot, [this._attributes.width, this._attributes.height])
-    this.setSupportedVideo(this.opts.videos).then(() => {
+    this._slot = environmentVars.slot || this.emit('AdError', 'Video slot is invalid')
+    this._videoSlot = environmentVars.videoSlot || this.emit('AdError', 'Slot is invalid')
+    this.setSize(this._videoSlot, [this._attributes.width, this._attributes.height])
+    this.useBestVideo().then(() => {
       this.emit('AdLoaded')
     }).catch((reason) => {
       this.emit('AdLog', reason)
       this.emit('AdLoaded')
     })
     this.videoTracker = new VideoTracker(this._videoSlot, this)
+  }
+
+  useBestVideo () {
+    return new Promise((resolve, reject) => {
+      const bestVideo = this.opts.videos.filter(video => isSupported(video.type))
+      if (bestVideo[0]) {
+        this.setVideoSource(bestVideo[0].url, bestVideo[0].type)
+          .then(resolve).catch(reject)
+      } else {
+        reject('no supported video found')
+      }
+    })
   }
 
   setVideoSource (src, type) {
@@ -133,9 +129,7 @@ variables. Refer to the language specific API description for more details.
       if (typeof this._videoSlot.onloadeddata === 'undefined') {
         resolve()
       } else {
-        this._videoSlot.onloadeddata = function () {
-          resolve()
-        }
+        this._videoSlot.onloadeddata = resolve
       }
       this._videoSlot.onerror = function (ev) {
         let msg
@@ -161,26 +155,6 @@ variables. Refer to the language specific API description for more details.
       }
       this._videoSlot.src = src
       this._videoSlot.type = type
-    })
-  }
-
-  getSupportedVideos (videos) {
-    const el = document.createElement('video')
-    return videos.filter(video => el.canPlayType(video.type))
-  }
-
-  setSupportedVideo (videos) {
-    return new Promise((resolve, reject) => {
-      const supportedVideos = this.getSupportedVideos(videos)
-      if (supportedVideos[0]) {
-        this.setVideoSource(supportedVideos[0].url, supportedVideos[0].type).then(() => {
-          resolve()
-        }).catch((reason) => {
-          reject(reason)
-        })
-      } else {
-        reject('no supported video found')
-      }
     })
   }
 
@@ -291,24 +265,25 @@ variables. Refer to the language specific API description for more details.
   }
 
   /**
-   * subscribe
+   * The video player calls this method to register a listener to a particular event
    *
-   * @param {function} handler
-   * @param {string} event
-   * @param {object} context
+   * @param  {Function} fn            fn is a reference to the function that needs to be called when the specified event occurs
+   * @param  {string}   event         event is the name of the event that the video player is subscribing to
+   * @param  {[type]}   listenerScope [optional] listenerScope is a reference to the object in which the function is
+defined
    */
-  subscribe (handler, event, context) {
-    this.on(event, handler, context)
+  subscribe (fn, event, listenerScope) {
+    this.on(event, fn, listenerScope)
   }
 
   /**
-   * unsubscribe
+   * The video player calls this method to remove a listener for a particular event
    *
-   * @param {function} handler
-   * @param {string} event
+   * @param  {Function} fn    the event listener that is being removed
+   * @param  {string}   event event is the name of the event that the video player is unsubscribing from
    */
-  unsubscribe (handler, event) {
-    this.off(event, handler)
+  unsubscribe (fn, event) {
+    this.off(event, fn)
   }
 
   /**
@@ -363,11 +338,7 @@ variables. Refer to the language specific API description for more details.
    * @return {number} seconds, if not implemented will return -1, or -2 if the time is unknown (user is engaged with the ad)
    */
   getAdRemainingTime () {
-    if (this.hasEngaged) {
-      return -2
-    } else {
-      return this._videoSlot.duration - this._videoSlot.currentTime
-    }
+    return this.hasEngaged ? -2 : this._videoSlot.duration - this._videoSlot.currentTime
   }
 
   /**
@@ -378,11 +349,7 @@ variables. Refer to the language specific API description for more details.
    * @return {number} seconds, if not implemented will return -1, or -2 if the time is unknown (user is engaged with the ad)
    */
   getAdDuration () {
-    if (this.hasEngaged) {
-      return -2
-    } else {
-      return this._videoSlot.duration
-    }
+    return this.hasEngaged ? -2 : this._videoSlot.duration
   }
 
   /**
@@ -441,4 +408,5 @@ variables. Refer to the language specific API description for more details.
     }, this)
   }
 }
+Linear.prototype.setSize = require('./util/set-size')
 module.exports = Linear
