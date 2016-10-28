@@ -129,7 +129,6 @@ describe('Linear', function () {
       it('should emit getAdWidth() when it is called', function (done) {
         let handler = function () {
           linear.unsubscribe(handler, 'Hello')
-          console.log('hi')
           done()
         }
         linear.subscribe(handler, 'Hello')

@@ -1,3 +1,7 @@
+# v2.1.3 -- 2016-10-28
+* Fix vpaid-methods not being compiled into babel by using `.js` instead of `.json`
+* `removeEventListener` is previously not working due to incorrect bindings.
+
 # v2.1.2 -- 2016-09-26
 
 * Cleanup & refactor

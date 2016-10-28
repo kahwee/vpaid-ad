@@ -1,0 +1,23 @@
+module.exports = [
+  'handshakeVersion',
+  'initAd',
+  'startAd',
+  'stopAd',
+  'skipAd',
+  'resizeAd',
+  'pauseAd',
+  'resumeAd',
+  'expandAd',
+  'collapseAd',
+  'getAdLinear',
+  'getAdWidth',
+  'getAdHeight',
+  'getAdExpanded',
+  'getAdadSkippableState',
+  'getAdRemainingTime',
+  'getAdDuration',
+  'getAdVolume',
+  'getAdCompanions',
+  'getAdIcons',
+  'setAdVolume'
+]

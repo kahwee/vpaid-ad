@@ -1,5 +1,5 @@
 const TinyEmitter = require('tiny-emitter')
-const vpaidMethods = require('./vpaid-methods.json')
+const vpaidMethods = require('./vpaid-methods')
 const VideoTracker = require('./video-tracker')
 const isSupported = require('./util/is-supported')
 

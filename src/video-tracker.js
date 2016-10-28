@@ -53,13 +53,17 @@ class VideoTracker {
   }
 
   addEventListeners () {
-    this.el.addEventListener('timeupdate', handleTimeupdate.bind(this))
-    this.el.addEventListener('ended', handleEnded.bind(this))
+    this.events = {
+      handleTimeupdate: handleTimeupdate.bind(this),
+      handleEnded: handleEnded.bind(this)
+    }
+    this.el.addEventListener('timeupdate', this.events.handleTimeupdate)
+    this.el.addEventListener('ended', this.events.handleEnded)
   }
 
   removeEventListeners () {
-    this.el.removeEventListener('timeupdate', handleTimeupdate)
-    this.el.removeEventListener('ended', handleEnded)
+    this.el.removeEventListener('timeupdate', this.events.handleTimeupdate)
+    this.el.removeEventListener('ended', this.events.handleEnded)
   }
 
 }

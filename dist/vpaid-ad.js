@@ -87,7 +87,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var TinyEmitter = require('tiny-emitter');
-var vpaidMethods = require('./vpaid-methods.json');
+var vpaidMethods = require('./vpaid-methods');
 var VideoTracker = require('./video-tracker');
 var isSupported = require('./util/is-supported');
 
@@ -102,7 +102,7 @@ var Linear = function (_TinyEmitter) {
   _inherits(Linear, _TinyEmitter);
 
   function Linear() {
-    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     _classCallCheck(this, Linear);
 
@@ -600,7 +600,7 @@ var Linear = function (_TinyEmitter) {
 Linear.prototype.setSize = require('./util/set-size');
 module.exports = Linear;
 
-},{"./util/is-supported":4,"./util/set-size":5,"./video-tracker":6,"./vpaid-methods.json":8,"tiny-emitter":1}],4:[function(require,module,exports){
+},{"./util/is-supported":4,"./util/set-size":5,"./video-tracker":6,"./vpaid-methods":8,"tiny-emitter":1}],4:[function(require,module,exports){
 'use strict';
 
 var el = void 0;
@@ -669,7 +669,7 @@ var VideoTracker = function () {
    * @return {[type]}         [description]
    */
   function VideoTracker(el, emitter) {
-    var prefix = arguments.length <= 2 || arguments[2] === undefined ? 'AdVideo' : arguments[2];
+    var prefix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'AdVideo';
 
     _classCallCheck(this, VideoTracker);
 
@@ -693,14 +693,18 @@ var VideoTracker = function () {
   }, {
     key: 'addEventListeners',
     value: function addEventListeners() {
-      this.el.addEventListener('timeupdate', handleTimeupdate.bind(this));
-      this.el.addEventListener('ended', handleEnded.bind(this));
+      this.events = {
+        handleTimeupdate: handleTimeupdate.bind(this),
+        handleEnded: handleEnded.bind(this)
+      };
+      this.el.addEventListener('timeupdate', this.events.handleTimeupdate);
+      this.el.addEventListener('ended', this.events.handleEnded);
     }
   }, {
     key: 'removeEventListeners',
     value: function removeEventListeners() {
-      this.el.removeEventListener('timeupdate', handleTimeupdate);
-      this.el.removeEventListener('ended', handleEnded);
+      this.el.removeEventListener('timeupdate', this.events.handleTimeupdate);
+      this.el.removeEventListener('ended', this.events.handleEnded);
     }
   }]);
 
@@ -715,28 +719,8 @@ module.exports = VideoTracker;
 module.exports = ['Start', 'FirstQuartile', 'Midpoint', 'ThirdQuartile', 'Complete'];
 
 },{}],8:[function(require,module,exports){
-module.exports=[
-  "handshakeVersion",
-  "initAd",
-  "startAd",
-  "stopAd",
-  "skipAd",
-  "resizeAd",
-  "pauseAd",
-  "resumeAd",
-  "expandAd",
-  "collapseAd",
-  "getAdLinear",
-  "getAdWidth",
-  "getAdHeight",
-  "getAdExpanded",
-  "getAdadSkippableState",
-  "getAdRemainingTime",
-  "getAdDuration",
-  "getAdVolume",
-  "getAdCompanions",
-  "getAdIcons",
-  "setAdVolume"
-]
+'use strict';
+
+module.exports = ['handshakeVersion', 'initAd', 'startAd', 'stopAd', 'skipAd', 'resizeAd', 'pauseAd', 'resumeAd', 'expandAd', 'collapseAd', 'getAdLinear', 'getAdWidth', 'getAdHeight', 'getAdExpanded', 'getAdadSkippableState', 'getAdRemainingTime', 'getAdDuration', 'getAdVolume', 'getAdCompanions', 'getAdIcons', 'setAdVolume'];
 
 },{}]},{},[2]);

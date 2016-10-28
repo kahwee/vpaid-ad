@@ -54,14 +54,14 @@ describe('VideoTracker', function () {
 
     describe('life cycle #2 (for staggering)', function () {
       it('should emit "AdVideoFirstQuartile"', function (done) {
-        emitter2.on('AdVideoFirstQuartile', function () {
+        emitter2.once('AdVideoFirstQuartile', function () {
           done()
         })
         videoSlot2.play()
       })
 
       it('should emit "AdVideoThirdQuartile"', function (done) {
-        emitter2.on('AdVideoThirdQuartile', function () {
+        emitter2.once('AdVideoThirdQuartile', function () {
           done()
         })
       })
