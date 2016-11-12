@@ -1,3 +1,6 @@
+# v2.1.4 -- 2016-10-28
+* Fix setSize on videoSlot
+
 # v2.1.3 -- 2016-10-28
 * Fix vpaid-methods not being compiled into babel by using `.js` instead of `.json`
 * `removeEventListener` is previously not working due to incorrect bindings.

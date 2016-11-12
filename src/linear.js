@@ -98,7 +98,6 @@ variables. Refer to the language specific API description for more details.
 
     this._slot = environmentVars.slot || this.emit('AdError', 'Video slot is invalid')
     this._videoSlot = environmentVars.videoSlot || this.emit('AdError', 'Slot is invalid')
-    this.setSize(this._videoSlot, [this._attributes.width, this._attributes.height])
     this.useBestVideo().then(() => {
       this.emit('AdLoaded')
     }).catch((reason) => {
@@ -408,5 +407,4 @@ defined
     }, this)
   }
 }
-Linear.prototype.setSize = require('./util/set-size')
 module.exports = Linear

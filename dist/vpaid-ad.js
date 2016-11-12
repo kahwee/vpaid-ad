@@ -204,7 +204,6 @@ var Linear = function (_TinyEmitter) {
 
       this._slot = environmentVars.slot || this.emit('AdError', 'Video slot is invalid');
       this._videoSlot = environmentVars.videoSlot || this.emit('AdError', 'Slot is invalid');
-      this.setSize(this._videoSlot, [this._attributes.width, this._attributes.height]);
       this.useBestVideo().then(function () {
         _this2.emit('AdLoaded');
       }).catch(function (reason) {
@@ -597,10 +596,9 @@ var Linear = function (_TinyEmitter) {
   return Linear;
 }(TinyEmitter);
 
-Linear.prototype.setSize = require('./util/set-size');
 module.exports = Linear;
 
-},{"./util/is-supported":4,"./util/set-size":5,"./video-tracker":6,"./vpaid-methods":8,"tiny-emitter":1}],4:[function(require,module,exports){
+},{"./util/is-supported":4,"./video-tracker":5,"./vpaid-methods":7,"tiny-emitter":1}],4:[function(require,module,exports){
 'use strict';
 
 var el = void 0;
@@ -612,20 +610,6 @@ module.exports = function (type) {
 };
 
 },{}],5:[function(require,module,exports){
-'use strict';
-
-module.exports = function (el, size) {
-  el.width = size[0];
-  el.height = size[1];
-  // Just in case .style is not defined. This does happen in cases
-  // where video players pass in mock DOM objects. Like Google IMA
-  if (el.style) {
-    el.style.width = size[0] + 'px';
-    el.style.height = size[1] + 'px';
-  }
-};
-
-},{}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -713,12 +697,12 @@ var VideoTracker = function () {
 
 module.exports = VideoTracker;
 
-},{"./vpaid-life-cycle":7}],7:[function(require,module,exports){
+},{"./vpaid-life-cycle":6}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = ['Start', 'FirstQuartile', 'Midpoint', 'ThirdQuartile', 'Complete'];
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 module.exports = ['handshakeVersion', 'initAd', 'startAd', 'stopAd', 'skipAd', 'resizeAd', 'pauseAd', 'resumeAd', 'expandAd', 'collapseAd', 'getAdLinear', 'getAdWidth', 'getAdHeight', 'getAdExpanded', 'getAdadSkippableState', 'getAdRemainingTime', 'getAdDuration', 'getAdVolume', 'getAdCompanions', 'getAdIcons', 'setAdVolume'];
