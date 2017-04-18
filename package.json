@@ -91,6 +91,6 @@
     "vpaid"
   ],
   "dependencies": {
-    "tiny-emitter": "^1.1.0"
+    "tiny-emitter": "^2.0.0"
   }
 }
