@@ -65,7 +65,6 @@ class VideoTracker {
     this.el.removeEventListener('timeupdate', this.events.handleTimeupdate)
     this.el.removeEventListener('ended', this.events.handleEnded)
   }
-
 }
 
 module.exports = VideoTracker

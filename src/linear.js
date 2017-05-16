@@ -11,7 +11,6 @@ function $removeAll () {
 }
 
 class Linear extends TinyEmitter {
-
   constructor (opts = {}) {
     super()
     this.baseUrl = ''
@@ -114,7 +113,7 @@ variables. Refer to the language specific API description for more details.
         this.setVideoSource(bestVideo[0].url, bestVideo[0].type)
           .then(resolve).catch(reject)
       } else {
-        reject('no supported video found')
+        reject(new Error('no supported video found'))
       }
     })
   }
@@ -150,7 +149,7 @@ variables. Refer to the language specific API description for more details.
             msg = 'An unknown error occurred.'
             break
         }
-        reject(`${msg} Type: ${type}, source: ${src}`)
+        reject(new Error(`${msg} Type: ${type}, source: ${src}`))
       }
       this._videoSlot.src = src
       this._videoSlot.type = type
