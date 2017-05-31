@@ -1,5 +1,7 @@
 # vpaid-ad
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/kahwee/vpaid-ad.svg)](https://greenkeeper.io/)
+
 VPAID ad class for extending purposes.
 
 [![Build Status](https://travis-ci.org/kahwee/vpaid-ad.svg?branch=master)](https://travis-ci.org/kahwee/vpaid-ad)
