@@ -54,7 +54,7 @@ describe('Linear', function () {
     describe('appendStylesheet()', function () {
       it('should have added style.css', function () {
         linear.appendStylesheet('/base/tests/fixtures/style.css')
-        expect(document.querySelector('link[href*="style.css"]')).to.be.defined
+        expect(document.querySelectorAll('link[href*="style.css"]')).to.be.length(1)
       })
     })
   })
