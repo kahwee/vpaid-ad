@@ -1,3 +1,4 @@
+/* eslint no-unused-expressions: "off" */
 const isSupported = require('../../src/util/is-supported')
 
 describe('util.isSupported', function () {

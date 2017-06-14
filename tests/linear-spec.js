@@ -1,3 +1,5 @@
+/* eslint no-unused-expressions: "off" */
+
 const Linear = require('../src/linear')
 
 describe('Linear', function () {
