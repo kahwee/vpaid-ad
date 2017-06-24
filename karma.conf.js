@@ -1,29 +1,15 @@
+const webpack = require('./webpack.config.js')
+const browsers = process.env.CI ? ['ChromeHeadless'] : ['Chrome']
 module.exports = function (config) {
-  var headless = process.env.CI === 'true'
-  const pkg = require('./package.json')
-  const browserifyTransform = [['browserify-istanbul', {
-    instrumenter: require('babel-istanbul')
-  }]].concat(pkg.browserify.transform)
-  var preprocessors = {}
-  preprocessors['./*.js'] = ['coverage']
-  preprocessors['./tests/**/*.js'] = ['browserify']
-
-  var browsers = headless ? ['Chrome_Travis'] : ['Chrome']
-
   config.set({
     basePath: '.',
-    reporters: ['mocha', 'coverage'],
-    frameworks: ['browserify', 'mocha', 'chai'],
-    browsers: browsers,
-    preprocessors: preprocessors,
+    frameworks: ['mocha', 'chai'],
+    preprocessors: {
+      'tests/*-spec.js': ['webpack'],
+      'tests/**/*-spec.js': ['webpack']
+    },
     files: [
       './tests/**/*-spec.js',
-      {
-        pattern: 'node_modules/babel-polyfill/dist/polyfill.min.js',
-        included: true,
-        served: true,
-        watched: false
-      },
       {
         pattern: 'tests/fixtures/*.mp4',
         included: false,
@@ -37,46 +23,30 @@ module.exports = function (config) {
         watched: false
       }
     ],
-    browserify: {
-      debug: true,
-      transform: browserifyTransform
-    },
-    client: {
-      mocha: {
-        reporter: 'html'
-      }
-    },
-    junitReporter: {
-      outputFile: '_karma.xml',
-      suite: ''
-    },
+    browsers,
+    webpack,
+    reporters: ['progress', 'coverage'],
     coverageReporter: {
       dir: 'coverage',
       reporters: [
-        { type: 'lcov',
-          subdir: 'report-lcov'
-        },
         {
-          type: 'cobertura',
-          subdir: '.',
-          file: 'cobertura.xml'
-        }, {
-          absolutePath: true,
-          type: 'html',
-          subdir: '.'
+          type: 'lcov',
+          subdir: 'report-lcov'
         }
       ]
     },
-    mochaReporter: {
-      divider: ''
-    },
-    customLaunchers: {
-      Chrome_Travis: {
-        base: 'Chrome',
-        flags: ['--no-sandbox']
+    webpackMiddleware: {
+      noInfo: true,
+      stats: {
+        chunks: false
       }
     },
-    // logLevel: 'INFO',
-    singleRun: headless
+    client: {
+      mocha: {
+        ui: 'bdd',
+        reporter: 'html'
+      }
+    },
+    singleRun: !!process.env.CI
   })
 }

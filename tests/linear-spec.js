@@ -1,6 +1,6 @@
 /* eslint no-unused-expressions: "off" */
 
-const Linear = require('../src/linear')
+import Linear from '../src/linear'
 
 describe('Linear', function () {
   describe('initializing with no videoSlot or slot', function () {
