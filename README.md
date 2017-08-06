@@ -9,8 +9,38 @@ VPAID ad class for extending purposes.
 [![Greenkeeper badge](https://badges.greenkeeper.io/kahwee/vpaid-ad.svg)](https://greenkeeper.io/)
 [![codecov](https://codecov.io/gh/kahwee/vpaid-ad/branch/master/graph/badge.svg)](https://codecov.io/gh/kahwee/vpaid-ad)
 
-This is a reference implementation of VPAID ad. Feel free to extend this to suit your needs.
+This is a reference implementation of VPAID ad. Feel free to extend this to suit your needs. It implements the most basic set of VPAID methods.
 
-# Resources
+## Installing using npm
+
+```sh
+npm i --save vpaid-ad
+```
+
+## Usage
+
+You can extend it using this way:
+
+```js
+const Linear = require('vpaid-ad/src/linear')
+class VpaidAd extends Linear {
+  initAd (width, height, viewMode, desiredBitrate, creativeData, environmentVars) {
+  	// Do something
+    super.initAd(
+      width,
+      height,
+      viewMode,
+      desiredBitrate,
+      creativeData,
+      environmentVars
+    )
+  }
+}
+
+window.getVPAIDAd = function () {
+  return new VpaidAd()
+}
+```
+## Resources
 
 * [MailOnline's VPAIDHTML5Client](https://github.com/MailOnline/VPAIDHTML5Client)
