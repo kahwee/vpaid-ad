@@ -505,7 +505,7 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'getAdRemainingTime',
     value: function getAdRemainingTime() {
-      return this.hasEngaged ? -2 : this._videoSlot.duration - this._videoSlot.currentTime;
+      return this._videoSlot.duration <= 0 || this._videoSlot.currentTime < 0 ? -2 : this._videoSlot.duration - this._videoSlot.currentTime;
     }
 
     /**
@@ -519,7 +519,7 @@ var Linear = function (_TinyEmitter) {
   }, {
     key: 'getAdDuration',
     value: function getAdDuration() {
-      return this.hasEngaged ? -2 : this._videoSlot.duration;
+      return this._videoSlot.duration <= 0 ? -2 : this._videoSlot.duration;
     }
 
     /**

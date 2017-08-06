@@ -336,7 +336,7 @@ defined
    * @return {number} seconds, if not implemented will return -1, or -2 if the time is unknown (user is engaged with the ad)
    */
   getAdRemainingTime () {
-    return this.hasEngaged ? -2 : this._videoSlot.duration - this._videoSlot.currentTime
+    return this._videoSlot.duration <= 0 || this._videoSlot.currentTime < 0 ? -2 : this._videoSlot.duration - this._videoSlot.currentTime
   }
 
   /**
@@ -347,7 +347,7 @@ defined
    * @return {number} seconds, if not implemented will return -1, or -2 if the time is unknown (user is engaged with the ad)
    */
   getAdDuration () {
-    return this.hasEngaged ? -2 : this._videoSlot.duration
+    return this._videoSlot.duration <= 0 ? -2 : this._videoSlot.duration
   }
 
   /**
