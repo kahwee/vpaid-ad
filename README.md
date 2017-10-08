@@ -41,6 +41,45 @@ window.getVPAIDAd = function () {
   return new VpaidAd()
 }
 ```
+
+Your player can then call:
+
+```js
+vpaid = window.getVPAIDAd()
+vpaid.subscribe(...)
+```
+
+### clickThru
+
+There's a special clickThru method that you can use:
+
+```js
+vpaid.clickThru({
+  url: 'https://example.com',
+  id: 'my-id',
+  playerHandles: true
+})
+```
+
+The above function emits the parameters as both an object and as an array.
+
+As an array:
+
+```json
+["https://example.com", "my-id", true]
+```
+
+As an object:
+
+```json
+{
+  "url": "https://example.com",
+  "id": "my-id",
+  "playerHandles": true
+}
+```
+
+
 ## Resources
 
 * [MailOnline's VPAIDHTML5Client](https://github.com/MailOnline/VPAIDHTML5Client)
