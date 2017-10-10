@@ -249,11 +249,7 @@ class Linear extends TinyEmitter {
    * @return {[type]}      [description]
    */
   clickThru (opts = {}) {
-    let params = [opts.url, opts.id, opts.playerHandles]
-    params.url = opts.url
-    params.id = opts.id
-    params.playerHandles = opts.playerHandles
-    this.emit('AdClickThru', params)
+    this.emit('AdClickThru', opts.url, opts.id, opts.playerHandles)
   }
 
   /**
