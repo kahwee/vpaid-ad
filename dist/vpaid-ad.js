@@ -390,11 +390,7 @@ var Linear = function (_TinyEmitter) {
     value: function clickThru() {
       var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var params = [opts.url, opts.id, opts.playerHandles];
-      params.url = opts.url;
-      params.id = opts.id;
-      params.playerHandles = opts.playerHandles;
-      this.emit('AdClickThru', params);
+      this.emit('AdClickThru', opts.url, opts.id, opts.playerHandles);
     }
 
     /**
