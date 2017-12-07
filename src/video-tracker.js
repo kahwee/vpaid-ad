@@ -21,8 +21,8 @@ function handleTimeupdate () {
   const upcomingQuartileIndex = this.quartileIndexEmitted + 1
   const upcomingQuartile = quartiles[upcomingQuartileIndex]
   if (upcomingQuartile && this.el.currentTime / this.el.duration > upcomingQuartile.value) {
-    this.emit(upcomingQuartile.name)
     this.quartileIndexEmitted = upcomingQuartileIndex
+    this.emit(upcomingQuartile.name)
   }
 }
 
