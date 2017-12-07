@@ -1,6 +1,6 @@
 {
   "name": "vpaid-ad",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "VPAID ad class for extending purposes.",
   "main": "lib/index.js",
   "scripts": {
