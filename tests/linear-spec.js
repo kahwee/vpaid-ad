@@ -22,7 +22,7 @@ describe('Linear', function () {
       linear.subscribe((reason) => {
         done()
       }, 'AdError')
-      linear.initAd(320, 160, 'normal', null, null, {slot})
+      linear.initAd(320, 160, 'normal', null, null, { slot })
     })
 
     it('should emit AdError when slot is not found', function (done) {
@@ -30,7 +30,7 @@ describe('Linear', function () {
       linear.subscribe((reason) => {
         done()
       }, 'AdError')
-      linear.initAd(320, 160, 'normal', null, null, {videoSlot})
+      linear.initAd(320, 160, 'normal', null, null, { videoSlot })
     })
   })
 
@@ -93,7 +93,7 @@ describe('Linear', function () {
           expect(linear._videoSlot).to.equal(videoSlot)
           done()
         }, 'AdLoaded')
-        linear.initAd(320, 160, 'normal', null, null, {slot, videoSlot})
+        linear.initAd(320, 160, 'normal', null, null, { slot, videoSlot })
       })
     })
 
