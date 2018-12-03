@@ -1,5 +1,12 @@
 const webpack = require('./webpack.config.js')
-const browsers = process.env.CI ? ['ChromeHeadless'] : ['Chrome']
+const browsers = !process.env.CI ? ['Chrome'] : ['ChromeHeadlessNoSandbox']
+const customLaunchers = !process.env.CI ? {} : {
+  // Workaround for permissions issues running Chrome with sandbox in docker
+  ChromeHeadlessNoSandbox: {
+    base: 'ChromeHeadless',
+    flags: ['--no-sandbox']
+  }
+}
 module.exports = function (config) {
   config.set({
     basePath: '.',
@@ -24,6 +31,7 @@ module.exports = function (config) {
       }
     ],
     browsers,
+    customLaunchers,
     webpack,
     reporters: ['progress', 'coverage'],
     coverageReporter: {
