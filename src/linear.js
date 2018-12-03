@@ -402,7 +402,7 @@ class Linear extends TinyEmitter {
    * @param {number} volume  between 0 and 1
    */
   setAdVolume (volume) {
-    if (this.previousAttributes.volume === volume) {
+    if (this._attributes.volume === volume) {
       // no change, no fire
       return
     }
@@ -411,6 +411,7 @@ class Linear extends TinyEmitter {
     }
     this.set('volume', volume)
     this._videoSlot.volume = volume
+    this._videoSlot.muted = !volume
     this.emit('AdVolumeChange')
   }
 

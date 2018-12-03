@@ -258,6 +258,7 @@ describe('Linear', function () {
         linear1.subscribe(function () {
           done()
         }, 'AdStarted')
+        linear1.setAdVolume(0) // to ensure autoplay works
         linear1.startAd()
       })
 

@@ -20,6 +20,8 @@ describe('VideoTracker', function () {
       tracker2 = new VideoTracker(videoSlot2, emitter2, 'AdVideo')
       videoSlot1.src = '/base/tests/fixtures/xbox-one.mp4'
       videoSlot2.src = '/base/tests/fixtures/xbox-one.mp4'
+      videoSlot1.volume = videoSlot2.volume = 0
+      videoSlot1.muted = videoSlot2.muted = true
       document.body.appendChild(videoSlot1)
       document.body.appendChild(videoSlot2)
     })

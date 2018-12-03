@@ -1,12 +1,12 @@
 {
   "name": "vpaid-ad",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "VPAID ad class for extending purposes.",
   "main": "lib/index.js",
   "scripts": {
     "lint": "standard",
     "babel": "./node_modules/.bin/babel -d lib src",
-    "build": "npm run lint && npm run babel && webpack",
+    "build": "npm run lint && npm run babel && webpack --mode=production",
     "test": "cross-env NODE_ENV=test karma start",
     "coveralls": "cat ./coverage/report-lcov/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
