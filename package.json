@@ -30,7 +30,7 @@
     "chai": "^4.2.0",
     "cross-env": "^5.2.0",
     "html-loader": "^0.5.5",
-    "karma": "^3.0.0",
+    "karma": "^4.0.1",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-cli": "^1.0.1",
